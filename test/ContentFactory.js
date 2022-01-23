@@ -36,6 +36,16 @@ describe("ContentFactory Contract", () => {
             .equals(ownerStake);
     });
 
+    it("Send money to the contract and see if ReceivedMoney event is emitted ", async () => {
+      await owner.sendTransaction({
+        to: contract.address,
+        value: ethers.utils.parseEther("1.0"),
+      });
+      expect(contract.receive()).to
+      .emit(contract, "ReceivedMoney")
+      .withArgs(owner.address, ethers.util.parseEther("1.0"));
+    });
+
     it("calculatePurchaseReturn function, when price < startingPrice", async () => {
       let price = 15000;
       await expect(contract.calculatePurchaseReturn(price)).to.be

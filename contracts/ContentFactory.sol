@@ -14,7 +14,7 @@ contract ContentFactory is Ownable{
   string public _tokenSymbol;
   mapping( address => uint256 ) public tokensOutstanding;
   string public _content;
-  
+  event ReceivedMoney(address, uint256);
   
   constructor(uint totalSupply, 
   uint ownerStake, 
@@ -33,11 +33,9 @@ contract ContentFactory is Ownable{
     tokensOutstanding[msg.sender] = ownerStake;
   }
 
-  //event Greet(string message);
-  
-  //function test() public {
-  //  emit Greet("hello world!");
-  //}
+  receive() external payable {
+    emit ReceivedMoney(msg.sender, msg.value);
+  }
   
   function getBalances(address sender) external view returns(uint256) {
     return tokensOutstanding[sender];
