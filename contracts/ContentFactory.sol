@@ -46,7 +46,7 @@ contract ContentFactory is Ownable{
   function calculatePurchaseReturn(uint256 price) external view returns(uint256) {
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
-    uint256 reserveBalance = getReserveBalance();
+    uint256 reserveBalance = address(this).balance;
     returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + (price/reserveBalance)) - 1);
     return returnStake;
   }
@@ -61,9 +61,5 @@ contract ContentFactory is Ownable{
       y = (x + number / x) / 2;
     }
     return x;
-  }
-
-  function getReserveBalance() internal pure returns(uint256) {
-    
   } 
 }
