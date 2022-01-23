@@ -12,7 +12,7 @@ contract ContentFactory is Ownable{
   uint private _startingPrice;
   string private _tokenName;
   string private _tokenSymbol;
-  mapping( address => uint256 ) private _tokensOutstanding;
+  mapping( address => uint256 ) public tokensOutstanding;
   string private _content;
   
   
@@ -21,7 +21,8 @@ contract ContentFactory is Ownable{
   uint startingPrice, 
   string memory tokenName, 
   string memory tokenSymbol, 
-  string memory content) {
+  string memory content
+  ) {
     _owner = msg.sender;
     _totalSupply = totalSupply;
     _ownerStake = ownerStake;
@@ -29,12 +30,16 @@ contract ContentFactory is Ownable{
     _tokenName = tokenName;
     _tokenSymbol = tokenSymbol;
     _content = content;
+    tokensOutstanding[msg.sender] = ownerStake;
   }
 
-  event Greet(string message);
+  //event Greet(string message);
   
-  function test() public {
-    emit Greet("hello world!");
+  //function test() public {
+  //  emit Greet("hello world!");
+  //}
+  
+  function getBalances(address sender) external view returns(uint256) {
+    return tokensOutstanding[sender];
   }
-
 }
