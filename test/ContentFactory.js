@@ -15,6 +15,8 @@ describe("ContentFactory Contract", () => {
         [owner] = await ethers.getSigners();
         ContentFactory = await ethers.getContractFactory("ContentFactory");
         contract = await ContentFactory.deploy(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
+        await contract.deployed();
+        console.log(contract);
     });
 
     //it("emit greeting event when greet function is called", async () => {
@@ -23,6 +25,10 @@ describe("ContentFactory Contract", () => {
     //        .emit(contentFactory, "Greet")
     //        .withArgs("hello Test one!");
     //});
+
+    it("Contract deploys succesfully", async () => {
+      expect(await contract.signer.address).to.equals(owner.address);
+    });
 
     it("Test if owner's stake is set to the total outstanding mapping ", async () => {
         let balances = await contract.getBalances(owner.address);
