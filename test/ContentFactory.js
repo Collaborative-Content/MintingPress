@@ -19,7 +19,7 @@ describe("ContentFactory Contract", () => {
         expect(contentFactory.test())
             .to
             .emit(contentFactory, "Greet")
-            .withArgs("hello world!");
+            .withArgs("hello Test one!");
     });
 
 });
