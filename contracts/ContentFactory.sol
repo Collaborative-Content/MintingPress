@@ -47,13 +47,13 @@ contract ContentFactory is Ownable{
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
     uint256 reserveBalance = getReserveBalance();
-    returnStake = (_totalSupply - _ownerStake)*(floorSquareRoot(1 + (price/reserveBalance)) - 1);
+    returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + (price/reserveBalance)) - 1);
     return returnStake;
   }
 
-  // No square root in solidity using the babylonian square root method.
+  // No square root in solidity - using the babylonian square root method.
   // I really hope this does not cost a fortune in gas!
-  function floorSquareRoot(uint256 number) internal pure returns(uint256) {
+  function squareRoot(uint256 number) internal pure returns(uint256) {
     uint256 x = number / 2 + 1;
     uint256 y = (x + number / x) / 2;
     while(x > y) {
