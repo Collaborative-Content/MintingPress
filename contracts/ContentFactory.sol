@@ -7,13 +7,13 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
 contract ContentFactory is Ownable{
   address private _owner;
-  uint private _totalSupply;
-  uint private _ownerStake;
-  uint private _startingPrice;
-  string private _tokenName;
-  string private _tokenSymbol;
+  uint256 public _totalSupply;
+  uint256 public _ownerStake;
+  uint256 public _startingPrice;
+  string public _tokenName;
+  string public _tokenSymbol;
   mapping( address => uint256 ) public tokensOutstanding;
-  string private _content;
+  string public _content;
   
   
   constructor(uint totalSupply, 
@@ -42,4 +42,28 @@ contract ContentFactory is Ownable{
   function getBalances(address sender) external view returns(uint256) {
     return tokensOutstanding[sender];
   }
+
+  function calculatePurchaseReturn(uint256 price) external view returns(uint256) {
+    require(price >= _startingPrice, "Below the minimum value for the pull request");
+    uint256 returnStake;
+    uint256 reserveBalance = getReserveBalance();
+    returnStake = (_totalSupply - _ownerStake)*(floorSquareRoot(1 + (price/reserveBalance)) - 1);
+    return returnStake;
+  }
+
+  // No square root in solidity using the babylonian square root method.
+  // I really hope this does not cost a fortune in gas!
+  function floorSquareRoot(uint256 number) internal pure returns(uint256) {
+    uint256 x = number / 2 + 1;
+    uint256 y = (x + number / x) / 2;
+    while(x > y) {
+      x = y;
+      y = (x + number / x) / 2;
+    }
+    return x;
+  }
+
+  function getReserveBalance() internal pure returns(uint256) {
+    
+  } 
 }
