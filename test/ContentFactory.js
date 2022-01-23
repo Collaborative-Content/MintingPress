@@ -16,7 +16,6 @@ describe("ContentFactory Contract", () => {
         ContentFactory = await ethers.getContractFactory("ContentFactory");
         contract = await ContentFactory.deploy(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
         await contract.deployed();
-        console.log(contract);
     });
 
     //it("emit greeting event when greet function is called", async () => {
