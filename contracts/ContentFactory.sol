@@ -41,10 +41,11 @@ contract ContentFactory is Ownable{
     return tokensOutstanding[sender];
   }
 
-  function calculatePurchaseReturn(uint256 price) external view returns(uint256) {
+  function calculatePurchaseReturn(uint256 price, uint256 reserveBalance) external view returns(uint256) {
     require(price >= _startingPrice, "Below the minimum value for the pull request");
+    require(reserveBalance > 0, "Reserve Token Balance cannot be 0!");
+    require(price < reserveBalance, "Enter a price that is less than the reserve balance of the contract");
     uint256 returnStake;
-    uint256 reserveBalance = address(this).balance;
     returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + (price/reserveBalance)) - 1);
     return returnStake;
   }

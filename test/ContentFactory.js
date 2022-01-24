@@ -46,11 +46,31 @@ describe("ContentFactory Contract", () => {
       .withArgs(owner.address, ethers.util.parseEther("1.0"));
     });
 
-    it("calculatePurchaseReturn function, when price < startingPrice", async () => {
-      let price = 15000;
-      await expect(contract.calculatePurchaseReturn(price)).to.be
+    it("calculatePurchaseReturn: When reserveBalance = 0", async () => {
+      let [price, reserveBalance ] = [ 24000, 0];
+      await expect(contract.calculatePurchaseReturn(price, reserveBalance)).to.be
+      .revertedWith('Reserve Token Balance cannot be 0!');
+    });
+
+    it("calculatePurchaseReturn: When price < startingPrice", async () => {
+      let [price, reserveBalance] = [15000, 200000];
+
+      await expect(contract.calculatePurchaseReturn(price, reserveBalance)).to.be
       .revertedWith('Below the minimum value for the pull request');
     });
+
+    it("calculatePurchaseReturn: When price > reserveBalance", async () => {
+      let [price, reserveBalance] = [25000, 20000];
+      await expect(contract.calculatePurchaseReturn(price, reserveBalance)).to.be
+      .revertedWith('Enter a price that is less than the reserve balance of the contract');
+    });
+
+    it("calculatePurchaseReturn: price=25000, reserveBalance=200000", async () => {
+      let [price, reserveBalance] = [25000, 200000];
+      await expect(contract.calculatePurchaseReturn(price, reserveBalance)).to.be
+      .equals(3033);
+    });
+
 });
 
 
