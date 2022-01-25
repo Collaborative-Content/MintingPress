@@ -3,15 +3,21 @@ const { ethers } = require("hardhat");
 
 describe("ContentFactory Contract", () => {
     let ContentFactory, contract;
-    let totalSupply = 100000;
-    let ownerStake = 50000;
-    let startingPrice = 20000;
-    let tokenName = "test";
-    let tokenSymbol = "tst";
-    let content = "some test content";
+    let totalSupply;
+    let ownerStake;
+    let startingPrice;
+    let tokenName;
+    let tokenSymbol;
+    let content;
     let owner;
 
     beforeEach(async () => {
+        totalSupply = 100000;
+        ownerStake = 50000;
+        startingPrice = 20000;
+        tokenName = "test";
+        tokenSymbol = "tst";
+        content = "some test content";
         [owner] = await ethers.getSigners();
         ContentFactory = await ethers.getContractFactory("ContentFactory");
         contract = await ContentFactory.deploy(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
@@ -47,21 +53,42 @@ describe("ContentFactory Contract", () => {
       .withArgs(owner.address, ethers.util.parseEther("1.0"));
     });*/
 
-    it("calculatePurchaseReturn: When price < startingPrice", async () => {
-      let price = 15000;
+    describe("Bonding Curve Test Cases:", () => {
 
-      await expect(contract.calculatePurchaseReturn(price)).to.be
-      .revertedWith('Below the minimum value for the pull request');
+      it("calculatePurchaseReturn: When price < startingPrice", async () => {
+        let price = 15000;
+  
+        await expect(contract.calculatePurchaseReturn(price)).to.be
+        .revertedWith('Below the minimum value for the pull request');
+      });
+
+      it("should return for price=25000 tokens=11237", async ()=> {
+        totalSupply = 100000;
+        ownerStake = 50000;
+        startingPrice = 20000;
+        tokenName = "test";
+        tokenSymbol = "tst";
+        content = "some test content";
+        let price = 25000;
+        
+        contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
+        expect(contract.calculatePurchaseReturn(price))
+        .to.emit(contract, "Tokens")
+        .withArgs(0);
+      });
+  
+      it("totalSupply = 10000000, creatorStake = 3000000, price=2500000000 returns Tokens greater than available supply", async () =>{
+        totalSupply = 10000000;
+        ownerStake = 3000000;
+        startingPrice = 20000;
+        tokenName = "test";
+        tokenSymbol = "tst";
+        content = "some test content";
+        let price = 2500000000;
+        contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
+        expect(await contract.calculatePurchaseReturn(price))
+        .to.emit(contract, "Tokens")
+        .withArgs(1554000000);
+      });
     });
-
-    it("calculatePurchaseReturn: price=25000", async () => {
-      let price = 25000;
-      expect(contract.calculatePurchaseReturn(price)).to.be
-      .equals(11237);
-    });
-
 });
-
-
-
-
