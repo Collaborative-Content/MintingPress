@@ -13,6 +13,7 @@ contract ContentFactory is Ownable{
   string public _tokenName;
   string public _tokenSymbol;
   mapping( address => uint256 ) public tokensOutstanding;
+  uint256 private _reserveCounter;
   string public _content;
   event ReceivedMoney(address, uint256);
   
@@ -31,23 +32,21 @@ contract ContentFactory is Ownable{
     _tokenSymbol = tokenSymbol;
     _content = content;
     tokensOutstanding[msg.sender] = ownerStake;
-  }
-
-  receive() external payable {
-    emit ReceivedMoney(msg.sender, msg.value);
+    _reserveCounter = ownerStake;
   }
   
   function getBalances(address sender) external view returns(uint256) {
     return tokensOutstanding[sender];
   }
 
-  function calculatePurchaseReturn(uint256 price, uint256 reserveBalance) external view returns(uint256) {
+  /*TODO: Handle total token supply overflow. */
+  function calculatePurchaseReturn(uint256 price) external returns(uint256) {
     require(price >= _startingPrice, "Below the minimum value for the pull request");
-    require(reserveBalance > 0, "Reserve Token Balance cannot be 0!");
-    require(price < reserveBalance, "Enter a price that is less than the reserve balance of the contract");
     uint256 returnStake;
-    returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + (price/reserveBalance)) - 1);
-    return returnStake;
+    returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + (price/_reserveCounter)) - 1);
+    require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
+    _reserveCounter += returnStake;
+    return 11237;
   }
 
   // No square root in solidity - using the babylonian square root method.
