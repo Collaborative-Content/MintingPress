@@ -58,7 +58,7 @@ contract ContentFactory is Ownable{
   function calculatePurchaseReturn(uint256 price) external {
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
-    returnStake = (_totalSupply - _ownerStake)*(squareRoot(1 + uint256(price/_reserveCounter)) - 1);
+    returnStake = (_totalSupply - _ownerStake)*(((squareRoot((1 + ((price * 100)/_reserveCounter)))) - 1)/10);
     //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
     _reserveCounter += returnStake;
     emit Tokens(returnStake);
