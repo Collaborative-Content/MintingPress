@@ -69,12 +69,12 @@ describe("ContentFactory Contract", () => {
         tokenName = "test";
         tokenSymbol = "tst";
         content = "some test content";
-        let price = 25000;
+        let price = 10000000000;
         
         contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
         expect(contract.calculatePurchaseReturn(price, owner.address))
         .to.emit(contract, "Tokens")
-        .withArgs(0);
+        .withArgs(2230000);
       });
   
       it("totalSupply = 10000000, creatorStake = 3000000, price=2500000000 returns Tokens greater than available supply", async () =>{
@@ -88,7 +88,7 @@ describe("ContentFactory Contract", () => {
         contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
         expect(await contract.calculatePurchaseReturn(price, owner.address))
         .to.emit(contract, "Tokens")
-        .withArgs(1561000000);
+        .withArgs(9800000);
       });
     });
 
@@ -96,17 +96,17 @@ describe("ContentFactory Contract", () => {
       it("Price=2500000, creatorStake=5000000, TotalSupply=1000000", async () => {
         totalSupply = 10000000;
         ownerStake = 3000000;
-        startingPrice = 20000;
+        startingPrice = 200000000;
         tokenName = "test";
         tokenSymbol = "tst";
         content = "some test content";
-        let price = 2500000000;
+        let price = 250000000;
         contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
         await contract.calculatePurchaseReturn(price, address1.address);
         let balanceof = await contract.balanceOf(address1.address, 0);
         expect(balanceof)
         .to
-        .equals(1561000000);
+        .equals(2800000);
       });
     })
 });

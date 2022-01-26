@@ -1,7 +1,8 @@
 //  SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.0;
-
+// import "contracts/libraries/ABDKMath64x64.sol";
+// import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -55,11 +56,15 @@ contract ContentFactory is ERC1155, Ownable{
     return tokensOutstanding[sender];
   }
 
+  function roundDivision(uint256 n, uint256 d) internal pure returns(uint256) {
+    return n / d + (n % d) / (d - d / 2);
+  }
+
   /*TODO: Handle total token supply overflow. */
   function calculatePurchaseReturn(uint256 price, address creater_address) external{
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
-    returnStake = (_totalSupply - _ownerStake)*(((squareRoot((1 + ((price * 100)/(_reserveCounter))))) - 1)/10);
+    returnStake = (_totalSupply - _ownerStake)*((ceilSqrt(1 + roundDivision((price * 10000),(_totalSupply-_reserveCounter)))/100) - 1)/10;
     //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
     _reserveCounter += returnStake;
     _mint(creater_address, 0 , returnStake,"");
@@ -78,4 +83,10 @@ contract ContentFactory is ERC1155, Ownable{
     }
     return x;
   } 
+
+  function ceilSqrt(uint256 number) internal pure returns (uint256){
+    uint256 x = squareRoot(number);
+    return x*x == number ? x : x+1;
+  }
+
 }
