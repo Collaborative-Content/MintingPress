@@ -9,7 +9,7 @@ describe("ContentFactory Contract", () => {
     let tokenName;
     let tokenSymbol;
     let content;
-    let owner;
+    let owner, address1, address2, address3;
 
     beforeEach(async () => {
         totalSupply = 100000;
@@ -18,7 +18,7 @@ describe("ContentFactory Contract", () => {
         tokenName = "test";
         tokenSymbol = "tst";
         content = "some test content";
-        [owner] = await ethers.getSigners();
+        [owner, address1, address2, address3] = await ethers.getSigners();
         ContentFactory = await ethers.getContractFactory("ContentFactory");
         contract = await ContentFactory.deploy(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
         await contract.deployed();
@@ -37,7 +37,7 @@ describe("ContentFactory Contract", () => {
     });
 
     it("Test if owner's stake is set to the total outstanding mapping ", async () => {
-        let balances = await contract.getBalances(owner.address);
+        let balances = await contract.balanceOf(owner.address, 0);
         expect(balances)
             .to
             .equals(ownerStake);
@@ -53,12 +53,12 @@ describe("ContentFactory Contract", () => {
       .withArgs(owner.address, ethers.util.parseEther("1.0"));
     });*/
 
-    describe("Bonding Curve Test Cases:", () => {
+    describe("Bonding Curve Function Test Cases:", () => {
 
       it("calculatePurchaseReturn: When price < startingPrice", async () => {
         let price = 15000;
   
-        await expect(contract.calculatePurchaseReturn(price)).to.be
+        await expect(contract.calculatePurchaseReturn(price, owner.address)).to.be
         .revertedWith('Below the minimum value for the pull request');
       });
 
@@ -72,7 +72,7 @@ describe("ContentFactory Contract", () => {
         let price = 25000;
         
         contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
-        expect(contract.calculatePurchaseReturn(price))
+        expect(contract.calculatePurchaseReturn(price, owner.address))
         .to.emit(contract, "Tokens")
         .withArgs(0);
       });
@@ -86,9 +86,27 @@ describe("ContentFactory Contract", () => {
         content = "some test content";
         let price = 2500000000;
         contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
-        expect(await contract.calculatePurchaseReturn(price))
+        expect(await contract.calculatePurchaseReturn(price, owner.address))
         .to.emit(contract, "Tokens")
-        .withArgs(1554000000);
+        .withArgs(1561000000);
       });
     });
+
+    describe("Assignment of Tokens from the Bonding Curve", () => {
+      it("Price=2500000, creatorStake=5000000, TotalSupply=1000000", async () => {
+        totalSupply = 10000000;
+        ownerStake = 3000000;
+        startingPrice = 20000;
+        tokenName = "test";
+        tokenSymbol = "tst";
+        content = "some test content";
+        let price = 2500000000;
+        contract.setValues(totalSupply, ownerStake, startingPrice, tokenName, tokenSymbol, content);
+        await contract.calculatePurchaseReturn(price, address1.address);
+        let balanceof = await contract.balanceOf(address1.address, 0);
+        expect(balanceof)
+        .to
+        .equals(1561000000);
+      });
+    })
 });
