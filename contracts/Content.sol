@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+
 import "./Settings.sol";
 import "./AdminProxy.sol";
 
@@ -28,8 +29,8 @@ contract Content is ERC1155, Ownable {
     BondingCurve bondingCurve;
 
     struct voteTally {
-        uint positiveVotes;
-        uint negativeVotes;
+        int positiveVotes;
+        int negativeVotes;
     }
 
     struct PR {
@@ -43,10 +44,11 @@ contract Content is ERC1155, Ownable {
     mapping(address => bool) public PRexists;
     mapping(address => int) public PRvotes;
     address[] public PRauthors;
+    address[] public topPRAuthors;
 
-    mapping(address => uint) public voteCredits;
+    mapping(address => int) public voteCredits;
 
-    event Voted(address voter, address PRowner, uint voteCredits, bool positive);
+    event Voted(address voter, address PRowner, int voteCredits);
     event NewPR(address PRowner, uint PRPrice);
 
     constructor(address _adminAddr,
@@ -103,16 +105,18 @@ contract Content is ERC1155, Ownable {
         emit NewPR(msg.sender, msg.value);
     }
 
-    function vote(address _PRowner, uint _numVotes, bool positive) external onlyAuthor {
+    function vote(address _PRowner, int _numVotes) external onlyAuthor {
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
         PR storage votingPR = PRs[msg.sender];
-        if (positive) {
+        if (_numVotes >= 0) {
+            require((_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
             votingPR.PRVoteTally.positiveVotes += _numVotes; 
         } else {
-            votingPR.PRVoteTally.negativeVotes += _numVotes; 
+            require((-_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
+            votingPR.PRVoteTally.negativeVotes -= _numVotes; 
         }
-        emit Voted(msg.sender, _PRowner, _numVotes, positive);
+        emit Voted(msg.sender, _PRowner, _numVotes);
     }
 
     // TODO approvePR should be called by the ContentFactory on all contracts at the same time
@@ -121,15 +125,15 @@ contract Content is ERC1155, Ownable {
     // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
     function approvePR() external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
-        require(!adminProxy.contributionsOpen(), "Contributions are currently open")
+        require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         tallyVotes();
-        PRwinner = _determineWinner();
+        address PRwinner = _determineWinner();
         _modifyContent(PRwinner);
         _clearPRs();
     }
 
-    function tallyVotes() external onlyOwner {
-        for (uint i = 0; i < PRauthors.length, i++) {
+    function tallyVotes() public onlyOwner {
+        for (uint i = 0; i < PRauthors.length; i++) {
             PR memory thisPR = PRs[PRauthors[i]];
             int totalVotes;
             totalVotes = thisPR.PRVoteTally.positiveVotes - thisPR.PRVoteTally.negativeVotes;
@@ -140,21 +144,20 @@ contract Content is ERC1155, Ownable {
     function _determineWinner() internal onlyOwner returns (address) {
         address topPRAuthor;
         // find AN author with the max vote value.
-        for (uint i = 0; i < PRauthors.length, i++) {
-            if (i = 0) {
+        for (uint i = 0; i < PRauthors.length; i++) {
+            if (i == 0) {
                 topPRAuthor = PRauthors[i];
                 continue;
             }
-            if (PRvotes[PRauthors[i]] >= PRvotes[topPRauthor]) {
+            if (PRvotes[PRauthors[i]] >= PRvotes[topPRAuthor]) {
                 topPRAuthor = PRauthors[i];
             }
         }
         // determine ALL addresses with the same max vote value in event of a tie.
         int maxVotes = PRvotes[topPRAuthor];
-        address[] topPRAuthors;
-        for (uint i = 0; i < PRauthors.length, i++) {
-            if (PRvotes[PRAuthors[i]] == maxVotes]) {
-                topPRAuthors.push(PRAuthors[i]);
+        for (uint i = 0; i < PRauthors.length; i++) {
+            if (PRvotes[PRauthors[i]] == maxVotes) {
+                topPRAuthors.push(PRauthors[i]);
             }
         }
         if (topPRAuthors.length != 1) {
@@ -167,8 +170,8 @@ contract Content is ERC1155, Ownable {
     function _modifyContent(address _PRwinner) internal onlyOwner {
         PR memory winningPR = PRs[_PRwinner];
         uint newcontentTokenID = contentTokenID + 1;
-        contentData = winningPR.content;
-        _burn(address(this), contentTokenID, 1, bytes(""));
+        contentData[newcontentTokenID] = winningPR.content;
+        _burn(address(this), contentTokenID, 1);
         _mint(address(this), newcontentTokenID, 1, bytes(""));
         contentTokenID = newcontentTokenID;
         // TODO determine amount of authorship token to mint based on winningPR.PRPrice; using 1 for now?
@@ -184,5 +187,6 @@ contract Content is ERC1155, Ownable {
             PRexists[PRauthor] = false;
         }
         delete PRauthors;
+        delete topPRAuthors;
     }
 }
