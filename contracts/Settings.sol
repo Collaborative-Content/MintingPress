@@ -11,7 +11,6 @@ contract Settings is Ownable {
     uint public VotingDuration;
     uint public ContributionDuration;
     uint8 ReserveTokenSpaces;
-
     // tokenomics limitations for content to be created
     // TODO verify this is all
     uint public MinimumPRPrice;

@@ -21,15 +21,29 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     struct BondingCurve {
         bytes32 tokenSymbol;
+        uint tokenID;
         uint totalSupply;
-        uint initialPrice;
         uint minPRPrice;
+        uint ownerStake;
     }
-    
-    // This needs to be an array or mapping
+
     mapping( uint => BondingCurve ) bondingCurveParams;
     mapping( uint => mapping( address => uint )) outstandingFungibleBalance;
+    mapping( uint => uint ) tokenReserveCounter;
 
+    function setBondingCurveParams(bytes32 _tokenSymbol,
+    uint _tokenID, 
+    uint _totalSupply, 
+    uint _ownerStake, 
+    uint _minPRPrice) internal {
+        bondingCurveParams[_tokenID].tokenSymbol = _tokenSymbol;  
+        bondingCurveParams[_tokenID].tokenID = _tokenID;
+        bondingCurveParams[_tokenID].ownerStake  = _ownerStake; 
+        bondingCurveParams[_tokenID].minPRPrice  = _minPRPrice;    
+        bondingCurveParams[_tokenID].totalSupply = _totalSupply;
+        tokenReserveCounter[_tokenID] += _ownerStake;
+    }
+    
     struct voteTally {
         int positiveVotes;
         int negativeVotes;
@@ -48,11 +62,12 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     address[] public PRauthors;
     address[] public topPRAuthors;
 
-    mapping(address => int) public voteCredits;
+    mapping(address => mapping(uint => uint)) public voteCredits;
 
     event Voted(address voter, address PRowner, int voteCredits);
-    event PRApproved();
+    event PRApproved(string message);
     event NewPR(address PRowner, uint PRPrice);
+    event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes32 tokenSymbol);
 
     constructor(address _adminAddr,
                 address _settingsAddr 
@@ -61,29 +76,17 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         settings = Settings(_settingsAddr);
         adminProxy = AdminProxy(_adminAddr);
         ContentContractAddress = address(this);
+    }
 
-    //TODO: replace}
-    mint_ownership(string memory _originalContent,
-                address _contentCreator,
-                uint totalSupply,
-                uint initialPrice,
-                uint minPRPrice)
-
-        require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
-        // TODO other checks on bonding curve based on additional settings
-        bondingCurveParams[].minPRPrice = minPRPrice;
-        bondingCurve.totalSupply = totalSupply;
-        bondingCurve.initialPrice = initialPrice;
-
-        contentData[0] = ""; // this is the authorship token ID and thus will have no data associated.
-        contentData[contentTokenID] = _originalContent;
-        _mint(address(this), contentTokenID, 1, bytes(""));
-
-        // TODO verify number of tokens to be minted, using 1 here for testing for now
-        // mint one token0 and send to original content creator (passed through from transaction to ContentFactory)
-        _mint(_contentCreator, 0, 1, bytes(""));
-    }   _mint(_contentCreator, 0, 1, bytes(""));
-    }   _mint(_contentCreator, 0, 1, bytes(""));
+    function calculatePurchaseReturn(uint256 price, address creator_address, uint256 tokenID) internal returns(uint) {
+        require(tokenID % 2 == 0, "Ownership tokenID required");
+        require(price >= bondingCurveParams[tokenID].minPRPrice, "Below the minimum value for the pull request");
+        uint256 returnStake;
+        returnStake = (bondingCurveParams[tokenID].totalSupply - bondingCurveParams[tokenID].ownerStake)*((mathUtils.ceilSqrt(1 + mathUtils.roundDivision((price * 10000),(bondingCurveParams[tokenID].totalSupply-tokenReserveCounter[tokenID])))/100) - 1)/10;
+        //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
+        tokenReserveCounter[tokenID] += returnStake;
+        emit FungibleTokensEmitted(creator_address, tokenID, returnStake, bondingCurveParams[tokenID].tokenSymbol);
+        return returnStake;
     }
 
     modifier onlyAuthor() {
@@ -113,14 +116,15 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     
     // @params data - story, symbol - fungible token symbol, 
     // mint a new piece of content. called the first time a new piece of content is created, and never again
-    function mint(bytes memory data, bytes32 memory symbol, uint totalSupply, uint initialPrice, uint minPRPrice) external {
+    function mint(bytes memory data, uint totalSupply, uint minPRPrice, uint ownerStake) external {
         // PUT IN BONDING CURVE METHOD
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
+        setBondingCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
+
         // TODO other checks on bonding curve based on additional settings
-        // bondingCurve(totalSupply, initialPrice, minPRPrice)
 
         super._mint(contentContract, contentTokenID, 1, data); // non fungible
-        _mintOwnership(msg.sender, contentTokenID-1, 1, symbol);   // fungible
+        _mintOwnership(msg.sender, contentTokenID-1, bondingCurveParams[contentTokenID-1].ownerStake, bondingCurveParams[contentTokenID - 1].symbol);   // fungible
         contentTokenID += Settings.ReserveTokenSpaces;  // increment to make space for new content
     }
 
@@ -149,16 +153,19 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, msg.value);
     }
 
-    function vote(address _PRowner, int _numVotes) external onlyAuthor {
+    function vote(address _PRowner, int _numVotes, unit tokenId) external onlyAuthor {
         require(adminProxy.votingOpen(), "Voting is currently closed");
+        voteCredits[msg.sender][tokenId] == outstandingFungibleBalance[tokenId][msg.sender] ** 2;
         require((_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
         PR storage votingPR = PRs[msg.sender];
         if (_numVotes >= 0) {
             require((_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
             votingPR.PRVoteTally.positiveVotes += _numVotes; 
+            voteCredits[msg.sender][tokenId] -= (_numVotes ** 2); 
         } else {
             require((-_numVotes <= voteCredits[msg.sender]), "Not enough vote credits");
             votingPR.PRVoteTally.negativeVotes -= _numVotes; 
+            voteCredits[msg.sender][tokenId] -= (_numVotes ** 2); 
         }
         emit Voted(msg.sender, _PRowner, _numVotes);
     }
@@ -176,6 +183,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
             PRwinner = _determineWinner(_id);
             _modifyContent(_id, PRwinner);
             _clearPRs(_id);
+            _id = _id+2;
     }
     
     // TODO : Create a new function to set all the params for the first mint of the content

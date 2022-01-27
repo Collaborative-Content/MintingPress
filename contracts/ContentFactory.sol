@@ -6,7 +6,7 @@ import "contracts/libraries/math.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ContentFactory is ERC1155, Ownable, IERC1155Receiver{
+contract ContentFactory is ERC1155, Ownable{
   address private _owner;
   uint256 public _totalSupply;
   uint256 public _ownerStake;
@@ -59,7 +59,7 @@ contract ContentFactory is ERC1155, Ownable, IERC1155Receiver{
 
   /*TODO: Handle total token supply overflow. */
   function calculatePurchaseReturn(uint256 price, address creater_address, uint256 tokenID) external{
-    require(tokenID % 2 == 0, "Ownership tokenID required")
+    require(tokenID % 2 == 0, "Ownership tokenID required");
     // TODO update to use tokenID
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
