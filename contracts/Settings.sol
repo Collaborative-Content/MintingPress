@@ -10,7 +10,7 @@ contract Settings is Ownable {
     // admins from ending the vote and contribution periods. 
     uint public VotingDuration;
     uint public ContributionDuration;
-    uint8 ReserveTokenSpaces;
+    uint public ReserveTokenSpaces;
     // tokenomics limitations for content to be created
     // TODO verify this is all
     uint public MinimumPRPrice;
