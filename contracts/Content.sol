@@ -8,25 +8,27 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
 
-contract Content is ERC1155, Ownable {
+contract Content is ERC1155, Ownable, IERC1155Receiver{
     AdminProxy immutable adminProxy;
     Settings immutable settings;
+    address public contentContract;
 
-    // token IDs 
-    uint public constant AUTHORSHIP_TOKENID = 0;
+    // content mapping
     uint public contentTokenID = 1;
     mapping(uint => string) public contentData;
 
     bool public contentComplete;
 
     struct BondingCurve {
-        string contentName;
+        bytes32 tokenSymbol;
         uint totalSupply;
         uint initialPrice;
         uint minPRPrice;
     }
-
-    BondingCurve bondingCurve;
+    
+    // This needs to be an array or mapping
+    mapping( uint => BondingCurve ) bondingCurveParams;
+    mapping( uint => mapping( address => uint )) outstandingFungibleBalance;
 
     struct voteTally {
         int positiveVotes;
@@ -49,23 +51,27 @@ contract Content is ERC1155, Ownable {
     mapping(address => int) public voteCredits;
 
     event Voted(address voter, address PRowner, int voteCredits);
+    event PRApproved();
     event NewPR(address PRowner, uint PRPrice);
 
     constructor(address _adminAddr,
-                address _settingsAddr, 
-                string memory _originalContent,
+                address _settingsAddr 
+                ) 
+                ERC1155("") {
+        settings = Settings(_settingsAddr);
+        adminProxy = AdminProxy(_adminAddr);
+        ContentContractAddress = address(this);
+
+    //TODO: replace}
+    mint_ownership(string memory _originalContent,
                 address _contentCreator,
                 uint totalSupply,
                 uint initialPrice,
-                uint minPRPrice) 
-                ERC1155("") {
-        
-        settings = Settings(_settingsAddr);
-        adminProxy = AdminProxy(_adminAddr);
+                uint minPRPrice)
 
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
         // TODO other checks on bonding curve based on additional settings
-        bondingCurve.minPRPrice = minPRPrice;
+        bondingCurveParams[].minPRPrice = minPRPrice;
         bondingCurve.totalSupply = totalSupply;
         bondingCurve.initialPrice = initialPrice;
 
@@ -76,6 +82,8 @@ contract Content is ERC1155, Ownable {
         // TODO verify number of tokens to be minted, using 1 here for testing for now
         // mint one token0 and send to original content creator (passed through from transaction to ContentFactory)
         _mint(_contentCreator, 0, 1, bytes(""));
+    }   _mint(_contentCreator, 0, 1, bytes(""));
+    }   _mint(_contentCreator, 0, 1, bytes(""));
     }
 
     modifier onlyAuthor() {
@@ -84,11 +92,47 @@ contract Content is ERC1155, Ownable {
         _;
     }
 
-    function submitPR(string memory _PRtext) external payable {
+
+    function tallyVotes(uint _tokenId) public onlyOwner {
+    for (uint i = 0; i < PRauthors.length; i++) {
+        PR memory thisPR = PRs[PRauthors[i]];
+        int totalVotes;
+        totalVotes = thisPR.PRVoteTally.positiveVotes - thisPR.PRVoteTally.negativeVotes;
+        PRvotes[PRauthors[i]] = totalVotes;
+    }
+}
+
+    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) 
+    external returns (bytes4) {
+             contentData[id] = data;
+    }
+
+    function append(string a, string b, string c) internal pure returns (string) {
+        return string(abi.encodePacked(a, b, c));
+    }
+    
+    // @params data - story, symbol - fungible token symbol, 
+    // mint a new piece of content. called the first time a new piece of content is created, and never again
+    function mint(bytes memory data, bytes32 memory symbol, uint totalSupply, uint initialPrice, uint minPRPrice) external {
+        // PUT IN BONDING CURVE METHOD
+        require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
+        // TODO other checks on bonding curve based on additional settings
+        // bondingCurve(totalSupply, initialPrice, minPRPrice)
+
+        super._mint(contentContract, contentTokenID, 1, data); // non fungible
+        _mintOwnership(msg.sender, contentTokenID-1, 1, symbol);   // fungible
+        contentTokenID += Settings.ReserveTokenSpaces;  // increment to make space for new content
+    }
+
+    function _mintOwnership(address to, uint256 id, uint256 amount, bytes memory data) internal {
+        super._mint(to, id, amount, data);
+    }
+
+    function submitPR(string memory _PRtext, uint tokenID) external payable {
         require(adminProxy.contributionsOpen(), 
                 "Contributions are currently closed");
         require(!PRexists[msg.sender], "Existing PR");
-        require((msg.value >= bondingCurve.minPRPrice), 
+        require((msg.value >= bondingCurveParams[tokenID].minPRPrice), 
                 "ETH Value is below minimum PR price");
         PRauthors.push(msg.sender);
         PRs[msg.sender] = PR({content: _PRtext, 
@@ -123,25 +167,22 @@ contract Content is ERC1155, Ownable {
     // ideally right before calling startContributionPeriod
     // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
     // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
-    function approvePR() external onlyOwner {
+    function approvePR(uint tokenID) external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
-        tallyVotes();
-        address PRwinner = _determineWinner();
-        _modifyContent(PRwinner);
-        _clearPRs();
-    }
-
-    function tallyVotes() public onlyOwner {
-        for (uint i = 0; i < PRauthors.length; i++) {
-            PR memory thisPR = PRs[PRauthors[i]];
-            int totalVotes;
-            totalVotes = thisPR.PRVoteTally.positiveVotes - thisPR.PRVoteTally.negativeVotes;
-            PRvotes[PRauthors[i]] = totalVotes;
-        }
+        uint _id = 1;   // start with the first piece of content
+        while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
+            tallyVotes(_id);
+            PRwinner = _determineWinner(_id);
+            _modifyContent(_id, PRwinner);
+            _clearPRs(_id);
     }
     
-    function _determineWinner() internal onlyOwner returns (address) {
+    // TODO : Create a new function to set all the params for the first mint of the content
+    // Will also call the bonding curve to determine the number of tokens to mint
+
+    
+    function _determineWinner(uint _tokenId) internal onlyOwner returns (address) {
         address topPRAuthor;
         // find AN author with the max vote value.
         for (uint i = 0; i < PRauthors.length; i++) {
@@ -161,22 +202,21 @@ contract Content is ERC1155, Ownable {
             }
         }
         if (topPRAuthors.length != 1) {
-            // TODO if there is a tie
-        } else {
+            // TODO determine the winner of the tie
+            // for now, just pick the first one
+            topPRAuthor = topPRAuthors[0];
+            return topPRAuthor;
+        }
+        else {
             return topPRAuthor;
         }
     }
 
-    function _modifyContent(address _PRwinner) internal onlyOwner {
+    function _modifyContent(uint _tokenId, address _PRwinner) internal onlyOwner {
         PR memory winningPR = PRs[_PRwinner];
-        uint newcontentTokenID = contentTokenID + 1;
-        contentData[newcontentTokenID] = winningPR.content;
-        _burn(address(this), contentTokenID, 1);
-        _mint(address(this), newcontentTokenID, 1, bytes(""));
-        contentTokenID = newcontentTokenID;
-        // TODO determine amount of authorship token to mint based on winningPR.PRPrice; using 1 for now?
-        // TODO other bonding curve updates
-        _mint(_PRwinner, 0, 1, bytes(""));
+        contentData = append(contentData[_tokenId], "\n\n", winningPR.content); 
+        // existing content + new lines + winning PR
+        _mintOwnership(_PRwinner, _tokenId-1, GET-FROM-BONDING-CURVE-MAPPING, bytes(""));
     }
 
     function _clearPRs() internal onlyOwner {

@@ -20,7 +20,8 @@ contract AdminProxy is Ownable {
     constructor(address _settings) {
         settings = Settings(_settings);
     }
-
+    
+    // ToDO : enhance this
     modifier areWeThereYet(uint _secondsElapsed) {
         require(block.timestamp > lastPeriod + _secondsElapsed, "Cannot initiate next period yet");
         lastPeriod = block.timestamp;

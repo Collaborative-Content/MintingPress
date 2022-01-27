@@ -1,28 +1,29 @@
 //  SPDX-License-Identifier: UNLICENSED
 
 pragma solidity ^0.8.0;
-// import "contracts/libraries/ABDKMath64x64.sol";
+import "contracts/libraries/math.sol";
 // import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ContentFactory is ERC1155, Ownable{
+contract ContentFactory is ERC1155, Ownable, IERC1155Receiver{
   address private _owner;
   uint256 public _totalSupply;
   uint256 public _ownerStake;
   uint256 public _startingPrice;
-  string public _tokenName;
-  string public _tokenSymbol;
-  mapping( address => uint256 ) public tokensOutstanding;
-  uint256 private _reserveCounter;
+  bytes32 public _tokenName;
+  bytes32 public _tokenSymbol;
+  mapping(uint256 => mapping(address => uint256 )) public tokensOutstanding;
+  mapping(uint256 => uint256) _reserveCounter;
   string public _content;
-  event Tokens(uint256);
+  event Tokens(uint256, uint256, bytes32);
+
   
   constructor(uint totalSupply, 
   uint ownerStake, 
   uint startingPrice, 
-  string memory tokenName, 
-  string memory tokenSymbol, 
+  bytes32  tokenName, 
+  bytes32  tokenSymbol, 
   string memory content
   ) ERC1155("") {
     _owner = msg.sender;
@@ -32,8 +33,8 @@ contract ContentFactory is ERC1155, Ownable{
     _tokenName = tokenName;
     _tokenSymbol = tokenSymbol;
     _content = content;
-    tokensOutstanding[msg.sender] = ownerStake;
-    _reserveCounter = ownerStake;
+    tokensOutstanding[0][msg.sender] = ownerStake;
+    _reserveCounter[0] = ownerStake;
     _mint(_owner, 0, _ownerStake, "");
   }
 
@@ -56,37 +57,20 @@ contract ContentFactory is ERC1155, Ownable{
     return tokensOutstanding[sender];
   }
 
-  function roundDivision(uint256 n, uint256 d) internal pure returns(uint256) {
-    return n / d + (n % d) / (d - d / 2);
-  }
-
   /*TODO: Handle total token supply overflow. */
-  function calculatePurchaseReturn(uint256 price, address creater_address) external{
+  function calculatePurchaseReturn(uint256 price, address creater_address, uint256 tokenID) external{
+    require(tokenID % 2 == 0, "Ownership tokenID required")
+    // TODO update to use tokenID
     require(price >= _startingPrice, "Below the minimum value for the pull request");
     uint256 returnStake;
-    returnStake = (_totalSupply - _ownerStake)*((ceilSqrt(1 + roundDivision((price * 10000),(_totalSupply-_reserveCounter)))/100) - 1)/10;
+    returnStake = (_totalSupply - _ownerStake)*((mathUtils.ceilSqrt(1 + mathUtils.roundDivision((price * 10000),(_totalSupply-_reserveCounter)))/100) - 1)/10;
     //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
-    _reserveCounter += returnStake;
-    _mint(creater_address, 0 , returnStake,"");
-    emit Tokens(returnStake);
+    _reserveCounter[tokenID] += returnStake;
+    _mint(creater_address, tokenID , returnStake,"");
+    emit Tokens(tokenID, returnStake, _tokenSymbol);
   }
 
 
-  // No square root in solidity - using the babylonian square root method.
-  // I really hope this does not cost a fortune in gas!
-  function squareRoot(uint256 number) internal pure returns(uint256) {
-    uint256 x = number / 2 + 1;
-    uint256 y = (x + number / x) / 2;
-    while(x > y) {
-      x = y;
-      y = (x + number / x) / 2;
-    }
-    return x;
-  } 
 
-  function ceilSqrt(uint256 number) internal pure returns (uint256){
-    uint256 x = squareRoot(number);
-    return x*x == number ? x : x+1;
-  }
 
 }
