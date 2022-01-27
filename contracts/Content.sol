@@ -73,7 +73,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
-    event NewPR(address PRowner, uint PRPrice, uint tokenID);
+    event NewPR(address PRowner, uint tokenID, uint PRPrice, uint ownershipTokensToMint);
     event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
 
     constructor(address _adminAddr,
@@ -101,7 +101,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 "Must have content authorship tokens");
         _;
     }
-
 
     function tallyVotes(uint _tokenId) public onlyOwner {
         address[] memory thisPRauthors = PRauthors[_tokenId];
@@ -167,10 +166,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                                        totalVotes: 0
                                     });
         PRexists[tokenID][msg.sender] = true;
-        // TODO determine the number of ownership tokens that would be minted upon approval, given this price?
-        // May be useful for owners when voting
-
-        emit NewPR(msg.sender, msg.value, tokenID);
+        // TODO verify below line is OK for PR; this is how much that WOULD be minted if this was approved
+        uint amount = calculatePurchaseReturn(PRs[tokenID][msg.sender].PRPrice, msg.sender, tokenID);
+        emit NewPR(msg.sender, tokenID, msg.value, amount);
     }
 
     function vote(address _PRowner, uint _numVotes, bool positive, uint tokenId) external onlyAuthor(tokenId) {
@@ -191,7 +189,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     // ideally right before calling startContributionPeriod
     // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
     // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
-    function approvePR(uint tokenID) external onlyOwner {
+    function approvePRs(uint tokenID) external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         uint _id = 1;   // start with the first piece of content
@@ -199,8 +197,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
             tallyVotes(_id);
             address PRwinner = _determineWinner(_id);
             if (PRwinner != 0) {
-                _modifyContent(_id, PRwinner);
-                // TODO : call the bonding curve to determine the number of tokens to mint for new owner
+                _modifyContentandMint(_id, PRwinner);
                 emit PRApproved(tokenID, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
                 emit NoPRApproved(tokenID);
@@ -246,7 +243,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         }
     }
 
-    function _modifyContent(uint _contentTokenId, address _PRwinner) internal onlyOwner {
+    function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
         PR memory winningPR = PRs[_contentTokenId][_PRwinner];
         contentData[_contentTokenId] = winningPR.content;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
         uint ownershipTokenId = _contentTokenId -1;
