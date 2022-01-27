@@ -71,7 +71,8 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     mapping(uint => mapping(address => uint)) public voteCredits;
 
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
-    event PRApproved(string message);
+    event PRApproved(uint tokenID, address PRwinner);
+    event NoPRApproved(uint tokenID);
     event NewPR(address PRowner, uint PRPrice, uint tokenID);
     event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
 
@@ -197,14 +198,17 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
             tallyVotes(_id);
             address PRwinner = _determineWinner(_id);
-            _modifyContent(_id, PRwinner);
+            if (PRwinner != 0) {
+                _modifyContent(_id, PRwinner);
+                // TODO : call the bonding curve to determine the number of tokens to mint for new owner
+                emit PRApproved(tokenID, PRwinner);
+            } else { // PRs all had 0 or negative votes, so no PR approved
+                emit NoPRApproved(tokenID);
+            }
             _clearPRs(_id);
             _id = _id+2;
+        }
     }
-    }
-    // TODO : Create a new function to set all the params for the first mint of the content
-    // Will also call the bonding curve to determine the number of tokens to mint
-
     
     function _determineWinner(uint _tokenId) internal onlyOwner returns (address) {
         address topPRAuthor;
@@ -226,14 +230,19 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 topPRAuthors[_tokenId].push(thisPRauthors[i]);
             }
         }
-        if (topPRAuthors[_tokenId].length != 1) {
-            // TODO determine the winner of the tie
-            // for now, just pick the first one
-            topPRAuthor = topPRAuthors[_tokenId][0];
-            return topPRAuthor;
-        }
-        else {
-            return topPRAuthor;
+        // if all totalVotes were <= 0, no PR is approved, return 0 address.
+        if (maxVotes > 0) {
+            if (topPRAuthors[_tokenId].length != 1) {
+                // TODO determine the winner of the tie
+                // for now, just pick the first one
+                topPRAuthor = topPRAuthors[_tokenId][0];
+                return topPRAuthor;
+            }
+            else {
+                return topPRAuthor;
+            }
+        } else {
+            return 0;
         }
     }
 
