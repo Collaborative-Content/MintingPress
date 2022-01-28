@@ -65,10 +65,11 @@ describe("Content Contract functions", function () {
         contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
         await contentContract.deployed();
         ownerStake=10**5;
-        supply= 10**18;
-        initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
+        supply= ethers.BigNumber.from("100000000000000000");
+        initialprice=ethers.BigNumber.from("100000000000000000");
         encoder = new TextEncoder();
         tempData = encoder.encode("hi I'm your original content");
+        tokensymbol = encoder.encode("HIITME");
     });
 
 
@@ -114,8 +115,8 @@ describe("Content Contract functions", function () {
 
         it("should assert that tokenID assigned to contract equals 1", async function () {
             ownerStake=10**5;
-            supply= 10**18;
-            initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
+            supply= ethers.BigNumber.from("100000000000000000");
+            initialprice=ethers.BigNumber.from("100000000000000000");
             await contentContract.connect(creator).mint(bytes("hi"), supply, initialprice, ownerStake, "UNO");
             expect(await contentContract.balanceOf(contentContract.address, 1)).to.equal(1);
         });
@@ -128,8 +129,8 @@ describe("Content Contract functions", function () {
 
         beforeEach(async function () {
             ownerStake=10**5;
-            supply= 10**18;
-            initialprice=10**18; //ethers.BigNumber.from("100000000000000000");
+            supply= ethers.BigNumber.from("100000000000000000");
+            initialprice=ethers.BigNumber.from("100000000000000000");
             await contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, initialprice, ownerStake, "HIITME");
         });
 
@@ -170,8 +171,8 @@ describe("Content Contract functions", function () {
 
         beforeEach(async function () {
             ownerStake=10**5;
-            supply= 10**18;
-            initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
+            supply= ethers.BigNumber.from("100000000000000000");
+            initialprice=ethers.BigNumber.from("100000000000000000");
             let encoder = new TextEncoder();
             let tempData = encoder.encode("hi I'm your original content");
             await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, "HIITME");
