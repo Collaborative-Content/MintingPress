@@ -196,7 +196,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
             tallyVotes(_id);
             address PRwinner = _determineWinner(_id);
-            if (PRwinner != 0) {
+            if (PRwinner != address(0)) {
                 _modifyContentandMint(_id, PRwinner);
                 emit PRApproved(tokenID, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
@@ -239,7 +239,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 return topPRAuthor;
             }
         } else {
-            return 0;
+            return address(0);
         }
     }
 
