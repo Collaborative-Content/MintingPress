@@ -20,11 +20,15 @@ describe("Content Contract constructor & setup", function () {
         adminContract = await AdminContract.deploy(settingsContract.address);
         await adminContract.deployed(); 
 
+        PullRequests = await ethers.getContractFactory("PullRequests");
+        prContract = await PullRequests.deploy();
+        await prContract.deployed(); 
+
         ContentContract = await ethers.getContractFactory("Content");
     });
 
     it("should assert the owner (admin) of the contract", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address);
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
         await contentContract.deployed();
         expect(await contentContract.owner()).to.equal(owner.address);
     });
@@ -53,8 +57,12 @@ describe("Content Contract functions", function () {
         adminContract = await AdminContract.deploy(settingsContract.address);
         await adminContract.deployed(); 
 
+        PullRequests = await ethers.getContractFactory("PullRequests");
+        prContract = await PullRequests.deploy();
+        await prContract.deployed(); 
+
         ContentContract = await ethers.getContractFactory("Content");
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address);
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
         await contentContract.deployed();
     });
 
@@ -100,7 +108,7 @@ describe("Content Contract functions", function () {
 
         it("should revert if owner stake too high", async function () {
             await expect(ContentContract.deploy(adminContract.address, settingsContract.address, 
-                "hi I'm your original content", creator.address, 100000, 10000, 1000))
+                prContract.address))
                 .to.be.revertedWith("Min PR Price is too low");
             // token supply is too low?
             // initial price is too low?
@@ -119,7 +127,8 @@ describe("Content Contract functions", function () {
 
             await adminContract.connect(owner).startContributionPeriod();
             PRtext = "testPR";
-            await contentContract.connect(creator).submitPR(PRtext);
+            tokenID = 1;
+            await contentContract.connect(creator).submitPR(PRtext, tokenID);
             
             expect(contentContract.PRs()[creator].content()).to.equal(PRtext);
             // PR block timestamp within PR window 
@@ -127,7 +136,8 @@ describe("Content Contract functions", function () {
 
         it("should revert when not in PR window", async function () {
             PRtext = "testPR";
-            expect(await contentContract.connect(creator).submitPR(PRtext)
+            tokenID = 1;
+            expect(await contentContract.connect(creator).submitPR(PRtext, tokenID)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
@@ -145,6 +155,7 @@ describe("Content Contract functions", function () {
             // setup
             await adminContract.connect(owner).startContributionPeriod();
             // test
+            tokenID = 1;
             await expect(
                 contentContract.connect(creator).vote("", 1, true)
             ).to.be.revertedWith("Cannot vote during contribution period");

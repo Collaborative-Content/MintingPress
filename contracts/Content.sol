@@ -10,14 +10,15 @@ import "./libraries/utils.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
 
-library BondingCurveLib {
+interface IPullRequests {
 
-
-
-}
-
-library PRLib {
-
+    function getContent(address _PRowner, uint tokenID) view external returns (bytes memory);
+    function getPrice(address _PRowner, uint tokenID) view external returns (uint);
+    function submitPR(string memory _PRtext, uint tokenID, address caller, uint value) external;
+    function determineWinner(uint _tokenId) external view returns (address);
+    function clearPRs(uint tokenId) external;
+    function tallyVotes(uint _tokenId) external;
+    function votePR(address _PRowner, uint _numVotes, bool positive, uint tokenId) external;
 }
 
 contract Content is ERC1155, Ownable, IERC1155Receiver{
@@ -45,17 +46,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         tokenReserveCounter[_tokenID] += _ownerStake;
     }
 
-    struct PR {
-        bytes content;
-        uint blockTimestamp;
-        uint positiveVotes;
-        uint negativeVotes;
-        uint totalVotes;
-        uint PRPrice;
-    }
-
     AdminProxy immutable adminProxy;
     Settings immutable settings;
+    address private PRsAddress;
     address public contentContract;
 
     // content mapping
@@ -63,6 +56,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     mapping(uint => bytes) public contentData;
     mapping(uint => bool) public contentComplete;
     mapping(uint => address[]) public contentAuthors;
+    mapping(uint => mapping(address => uint)) public voteCredits;
 
     mapping( uint => BondingCurve ) bondingCurveParams;
     // TODO can we remove outstandingFungibleBalance and replace with balanceof() from ERC1155?
@@ -70,27 +64,22 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     // TODO can we put tokenReserveCounter inside the BondingCurve struct??
     mapping( uint => uint ) tokenReserveCounter;
 
-
-    mapping(uint => mapping(address => PR)) public PRs;
-    mapping(uint => mapping(address => bool)) public PRexists;
-    mapping(uint => address[]) public PRauthors;
-
-    mapping(uint => mapping(address => uint)) public voteCredits;
-
     // TODO implement completion vote
     mapping(uint => mapping(address => bool)) votesToComplete;
 
+    event NewPR(address PRowner, uint tokenID, uint PRPrice, uint ownershipTokensToMint);
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
-    event NewPR(address PRowner, uint tokenID, uint PRPrice, uint ownershipTokensToMint);
     event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
     event NewContentMinted(uint tokenID, address creator);
 
     constructor(address _adminAddr,
-                address _settingsAddr 
+                address _settingsAddr,
+                address _PRsAddr
                 ) 
                 ERC1155("") {
+        PRsAddress = _PRsAddr;
         settings = Settings(_settingsAddr);
         adminProxy = AdminProxy(_adminAddr);
         contentContract = address(this);
@@ -113,19 +102,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         _;
     }
 
-    function tallyVotes(uint _tokenId) public onlyOwner {
-        address[] memory thisPRauthors = PRauthors[_tokenId];
-        for (uint i = 0; i < thisPRauthors.length; i++) {
-            PR memory thisPR = PRs[_tokenId][thisPRauthors[i]];
-            uint totalVotes;
-            if (thisPR.positiveVotes > thisPR.negativeVotes) {
-                totalVotes = thisPR.positiveVotes - thisPR.negativeVotes;
-            } else {
-                totalVotes = 0;
-            }
-            PRs[_tokenId][thisPRauthors[i]].totalVotes = totalVotes;
-        }
-    }
 
     function onERC1155Received(address operator, address from, uint id, uint value, bytes calldata data) 
     external returns (bytes4) {
@@ -168,20 +144,11 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function submitPR(string memory _PRtext, uint tokenID) external payable {
         require(adminProxy.contributionsOpen(), 
                 "Contributions are currently closed");
-        require(!PRexists[tokenID][msg.sender], "Existing PR");
         require((msg.value >= bondingCurveParams[tokenID].minPRPrice), 
                 "ETH Value is below minimum PR price");
-        PRauthors[tokenID].push(msg.sender);
-        PRs[tokenID][msg.sender] = PR({content: bytes(_PRtext), 
-                                       blockTimestamp: block.timestamp,
-                                       PRPrice: msg.value,
-                                       positiveVotes: 0,
-                                       negativeVotes: 0,
-                                       totalVotes: 0
-                                    });
-        PRexists[tokenID][msg.sender] = true;
-        // TODO verify below line is OK for PR; this is how much that WOULD be minted if this was approved
-        uint amount = calculatePurchaseReturn(PRs[tokenID][msg.sender].PRPrice, msg.sender, tokenID);
+        // What happens if reverts inside below call? 
+        IPullRequests(PRsAddress).submitPR(_PRtext, tokenID, msg.sender, msg.value);
+        uint amount = calculatePurchaseReturn(msg.value, msg.sender, tokenID);
         emit NewPR(msg.sender, tokenID, msg.value, amount);
     }
 
@@ -199,12 +166,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(adminProxy.votingOpen(), "Voting is currently closed");
         //voteCredits[tokenId][msg.sender] == outstandingFungibleBalance[tokenId][msg.sender] ** 2;
         require((_numVotes <= voteCredits[tokenId][msg.sender]), "Not enough vote credits");
-        PR storage votingPR = PRs[tokenId][msg.sender];
-        if (positive) {
-            votingPR.positiveVotes += _numVotes; 
-        } else {
-            votingPR.negativeVotes += _numVotes; 
-        }
+        IPullRequests(PRsAddress).votePR(_PRowner, _numVotes, positive, tokenId);
         voteCredits[tokenId][msg.sender] -= (_numVotes ** 2); 
         emit Voted(msg.sender, _PRowner, _numVotes, positive, tokenId);
     }
@@ -222,74 +184,26 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         uint _id = 1;   // start with the first piece of content
         while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
-            tallyVotes(_id);
-            address PRwinner = _determineWinner(_id);
+            IPullRequests(PRsAddress).tallyVotes(_id);
+            address PRwinner = IPullRequests(PRsAddress).determineWinner(_id);
             if (PRwinner != address(0)) {
                 _modifyContentandMint(_id, PRwinner);
                 emit PRApproved(tokenID, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
                 emit NoPRApproved(tokenID);
             }
-            _clearPRs(_id);
+            IPullRequests(PRsAddress).clearPRs(_id);
             _id = _id+2;
-        }
-    }
-    
-    function _determineWinner(uint _tokenId) internal view onlyOwner returns (address) {
-        address topPRAuthor;
-        // find AN author with the max vote value.
-        address[] memory thisPRauthors = PRauthors[_tokenId];
-        for (uint i = 0; i < thisPRauthors.length; i++) {
-            if (i == 0) {
-                topPRAuthor = thisPRauthors[i];
-                continue;
-            }
-            if (PRs[_tokenId][thisPRauthors[i]].totalVotes >= PRs[_tokenId][topPRAuthor].totalVotes) {
-                topPRAuthor = thisPRauthors[i];
-            }
-        }
-        address[100] memory topPRAuthors;
-        // determine ALL addresses with the same max vote value in event of a tie.
-        uint maxVotes = PRs[_tokenId][topPRAuthor].totalVotes;
-        uint numAuthorsTied = 0;
-        for (uint i = 0; i < thisPRauthors.length; i++) {
-            if (PRs[_tokenId][thisPRauthors[i]].totalVotes == maxVotes) {
-                topPRAuthors[numAuthorsTied] = thisPRauthors[i];
-                numAuthorsTied++;
-            }
-        }
-        // if all totalVotes were <= 0, no PR is approved, return 0 address.
-        if (maxVotes > 0) {
-            if (numAuthorsTied != 1) {
-                // TODO determine the winner of the tie
-                // for now, just pick the first one
-                topPRAuthor = topPRAuthors[0];
-                return topPRAuthor;
-            }
-            else {
-                return topPRAuthor;
-            }
-        } else {
-            return address(0);
         }
     }
 
     function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
-        PR memory winningPR = PRs[_contentTokenId][_PRwinner];
-        contentData[_contentTokenId] = winningPR.content;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
+        bytes memory winningContent = IPullRequests(PRsAddress).getContent(_PRwinner, _contentTokenId);
+        uint winningPRPrice = IPullRequests(PRsAddress).getPrice(_PRwinner, _contentTokenId);
+        contentData[_contentTokenId] = winningContent;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
-        uint amount = calculatePurchaseReturn(winningPR.PRPrice, _PRwinner, ownershipTokenId);
+        uint amount = calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
-    }
-
-    function _clearPRs(uint tokenId) internal onlyOwner {
-        for (uint i = 0; i < PRauthors[tokenId].length; i++) {
-            address PRauthor = PRauthors[tokenId][i];
-            PR memory emptyPR;
-            PRs[tokenId][PRauthor] = emptyPR;
-            PRexists[tokenId][PRauthor] = false;
-        }
-        delete PRauthors[tokenId];
     }
 }
