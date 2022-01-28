@@ -4,44 +4,23 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "./libraries/math.sol";
-// import "./libraries/utils.sol";
 
+import "./libraries/math.sol";
 import "./PullRequests.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
+import "./BondingCurve.sol";
+
 
 contract Content is ERC1155, Ownable, IERC1155Receiver{
     //using BondingCurveLib for BondingCurveLib.BondingCurve;
     //using PRLib for PRLib.PR;
 
-    struct BondingCurve {
-        bytes tokenSymbol;
-        uint tokenID;
-        uint totalSupply;
-        uint minPRPrice;
-        uint ownerStake;
-    }
-
-    function setBondingCurveParams(bytes memory _tokenSymbol,
-    uint _tokenID, 
-    uint _totalSupply, 
-    uint _ownerStake, 
-    uint _minPRPrice) internal {
-        bondingCurveParams[_tokenID] = BondingCurve({
-            tokenSymbol: _tokenSymbol, 
-            tokenID: _tokenID,
-            ownerStake: _ownerStake, 
-            minPRPrice: _minPRPrice,    
-            totalSupply: _totalSupply
-        });
-        tokenReserveCounter[_tokenID] += _ownerStake;
-    }
 
     AdminProxy immutable adminProxy;
     Settings immutable settings;
-    PullRequests PRsContract;
-    //address private PRsAddress;
+    PullRequests immutable PRsContract;
+    BondingCurve immutable bondingCurve;
     address public contentContract;
 
     // content mapping
@@ -51,11 +30,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     mapping(uint => address[]) public contentAuthors;
     mapping(uint => mapping(address => uint)) public voteCredits;
 
-    mapping( uint => BondingCurve ) bondingCurveParams;
     // TODO can we remove outstandingFungibleBalance and replace with balanceof() from ERC1155?
     mapping( uint => mapping( address => uint )) outstandingFungibleBalance; 
-    // TODO can we put tokenReserveCounter inside the BondingCurve struct??
-    mapping( uint => uint ) tokenReserveCounter;
+    mapping(uint => mapping(address => uint)) public voteCredits;
 
     // TODO implement completion vote
     mapping(uint => mapping(address => bool)) votesToComplete;
@@ -64,29 +41,19 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
-    event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
     event NewContentMinted(uint tokenID, address creator);
 
     constructor(address _adminAddr,
                 address _settingsAddr,
-                address _PRsAddr
+                address _PRsAddr,
+                address _bondingCurveAddr
                 ) 
                 ERC1155("") {
         PRsContract = new PullRequests();
         settings = Settings(_settingsAddr);
         adminProxy = AdminProxy(_adminAddr);
+        bondingCurve = BondingCurve(_bondingCurveAddr);
         contentContract = address(this);
-    }
-
-    function calculatePurchaseReturn(uint price, address creator_address, uint tokenID) public returns(uint) {
-        require(tokenID % 2 == 0, "Ownership tokenID required");
-        require(price >= bondingCurveParams[tokenID].minPRPrice, "Below the minimum value for the pull request");
-        uint returnStake;
-        returnStake = (bondingCurveParams[tokenID].totalSupply - bondingCurveParams[tokenID].ownerStake)*((mathUtils.ceilSqrt(1 + mathUtils.roundDivision((price * 10000),(bondingCurveParams[tokenID].totalSupply-tokenReserveCounter[tokenID])))/100) - 1)/10;
-        //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
-        tokenReserveCounter[tokenID] += returnStake;
-        emit FungibleTokensEmitted(creator_address, tokenID, returnStake, bondingCurveParams[tokenID].tokenSymbol);
-        return returnStake;
     }
 
     modifier onlyAuthor(uint tokenID) {
@@ -123,10 +90,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(totalSupply >= settings.MinimumInitialSupply(), "Total Supply too low");
         require(ownerStake <= totalSupply, "Owner stake must be less than supply");
         
-        setBondingCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
+        bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
         super._mint(contentContract, contentTokenID, 1, data); // non fungible
-        _mintOwnership(msg.sender, contentTokenID-1, ownerStake, tokenSymbol);   // fungible
-        emit NewContentMinted(contentTokenID-1, msg.sender);
+        _mintOwnership(msg.sender, 
+                       contentTokenID-1, 
+                       bondingCurve.getOwnerStake(contentTokenID-1), 
+                       bondingCurve.getTokenSymbol(contentTokenID-1));   // fungible
+        emit NewContentMinted(contentTokenID, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
     }
 
@@ -141,7 +111,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(!(PRsContract.getPRexists()[tokenID][msg.sender]), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
         PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
-        uint amount = calculatePurchaseReturn(msg.value, msg.sender, tokenID);
+        uint amount = bondingCurve.calculatePurchaseReturn(PRs[tokenID][msg.sender].PRPrice, msg.sender, tokenID);
         emit NewPR(msg.sender, tokenID, msg.value, amount);
     }
 
@@ -196,7 +166,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         contentData[_contentTokenId] = winningContent;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
-        uint amount = calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
+        uint amount = bondingCurve.calculatePurchaseReturn(winningPR.PRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
     }
 }
