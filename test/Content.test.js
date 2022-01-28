@@ -64,12 +64,15 @@ describe("Content Contract functions", function () {
         ContentContract = await ethers.getContractFactory("Content");
         contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
         await contentContract.deployed();
-        ownerStake=10**5;
-        supply= ethers.BigNumber.from("100000000000000000");
+        ownerStake=5* 10**5;
+        supply= 10**7;
         initialprice=ethers.BigNumber.from("100000000000000000");
         encoder = new TextEncoder();
         tempData = encoder.encode("hi I'm your original content");
         tokensymbol = encoder.encode("HIITME");
+        overridesWithETH = {
+            value: ethers.utils.parseEther("1.0")
+        };
     });
 
 
@@ -77,17 +80,25 @@ describe("Content Contract functions", function () {
         
         it("should assert that new content created, author with correct stake and content is correct", async function () {
 
-            await expect(contentContract.connect(creator).mint(tempdata, supply, 
-            initialprice, ownerStake, "HIITME"))
+            //await owner.sendTransaction({
+                //         to: contract.address,
+                //         value: ethers.utils.parseEther("1.0"),
+                //       });
+                
+            console.log(await contentContract.connect(creator).calculatePurchaseReturn(
+                initialprice, creator.address, 2));
+
+            await expect(contentContract.connect(creator).mint(tempData, supply, 
+            initialprice, ownerStake, tokensymbol, overridesWithETH))
             .to.emit(contentContract, "NewContentMinted").withArgs(0, creator.address);
             expect(await contentContract.balanceOf(creator.address, 0)).to.equal(ownerStake);
             expect(await contentContract.contentData(contentToken)).to.equal(tempData);
         });
 
         it("should revert if ownerstake greater than supply", async function () {
-            supply=10**4;
-            expect(await contentContract.connect(creator).mint(tempData, 
-            supply, initialprice, ownerStake, "HIITME"))
+            ownerStake = 4 * 10**8;
+            await expect(contentContract.connect(creator).mint(tempData, 
+            supply, initialprice, ownerStake, tokensymbol, overridesWithETH))
             .to.be.revertedWith("Owner stake must be less than supply");
 
             //require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -98,26 +109,19 @@ describe("Content Contract functions", function () {
 
         it("should revert if PR price,initial price, or supply is too low", async function () {
             initialprice = 1000;
-            await expect(contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, 
-            initialprice, ownerStake, "HIITME"))
+            await expect(contentContract.connect(creator).mint(tempData, supply, 
+            initialprice, ownerStake, tokensymbol, overridesWithETH))
             .to.be.revertedWith("Min PR Price is too low");
             // token supply is too low?
             // initial price is too low?
         });
 
-        it("should revert if owner stake too high", async function () {
-            await expect(ContentContract.deploy(adminContract.address, settingsContract.address, 
-                prContract.address))
-                .to.be.revertedWith("Min PR Price is too low");
-            // token supply is too low?
-            // initial price is too low?
-        });
+        // it("should revert if owner stake too high", async function () {
+            
+        // });
 
         it("should assert that tokenID assigned to contract equals 1", async function () {
-            ownerStake=10**5;
-            supply= ethers.BigNumber.from("100000000000000000");
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            await contentContract.connect(creator).mint(bytes("hi"), supply, initialprice, ownerStake, "UNO");
+            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
             expect(await contentContract.balanceOf(contentContract.address, 1)).to.equal(1);
         });
     
@@ -128,10 +132,7 @@ describe("Content Contract functions", function () {
     describe("PR submitted", function () {
 
         beforeEach(async function () {
-            ownerStake=10**5;
-            supply= ethers.BigNumber.from("100000000000000000");
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            await contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, initialprice, ownerStake, "HIITME");
+            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
         });
 
         it("should revert when not in PR window", async function () {
@@ -170,12 +171,7 @@ describe("Content Contract functions", function () {
     describe("voting", function() {
 
         beforeEach(async function () {
-            ownerStake=10**5;
-            supply= ethers.BigNumber.from("100000000000000000");
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            let encoder = new TextEncoder();
-            let tempData = encoder.encode("hi I'm your original content");
-            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, "HIITME");
+            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
             await adminContract.connect(owner).startContributionPeriod();
             
             PRtext1 = "testPR uno";

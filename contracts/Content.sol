@@ -76,7 +76,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         contentContract = address(this);
     }
 
-    function calculatePurchaseReturn(uint price, address creator_address, uint tokenID) internal returns(uint) {
+    function calculatePurchaseReturn(uint price, address creator_address, uint tokenID) public returns(uint) {
         require(tokenID % 2 == 0, "Ownership tokenID required");
         require(price >= bondingCurveParams[tokenID].minPRPrice, "Below the minimum value for the pull request");
         uint returnStake;
@@ -97,6 +97,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function onERC1155Received(address operator, address from, uint id, uint value, bytes calldata data) 
     external returns (bytes4) {
              contentData[id] = data;
+             return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }
 
     function onERC1155BatchReceived(

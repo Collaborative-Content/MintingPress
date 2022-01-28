@@ -31,7 +31,7 @@ contract Settings is Ownable {
         ContributionDuration = 5 * 86400; // five days
         MinimumPRPrice = 0.01 * 10 ** 18; //0.01 ETH, in wei
         MinimumInitialPrice = 0.1 * 10 ** 18; //0.1 ETH, in wei
-        MinimumInitialSupply = 10 ** 18;
+        MinimumInitialSupply = 10 ** 7;
         MaxPRs = 20;
     }
 
