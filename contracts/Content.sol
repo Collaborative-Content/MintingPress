@@ -74,7 +74,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     mapping(uint => mapping(address => PR)) public PRs;
     mapping(uint => mapping(address => bool)) public PRexists;
     mapping(uint => address[]) public PRauthors;
-    mapping(uint => address[]) public topPRAuthors;
 
     mapping(uint => mapping(address => uint)) public voteCredits;
 
@@ -191,7 +190,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
-                voteCredits[tokenId][author] == outstandingFungibleBalance[tokenId][author] ** 2;
+                voteCredits[tokenId][author] = outstandingFungibleBalance[tokenId][author] ** 2;
             }
         }
     }
@@ -236,7 +235,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         }
     }
     
-    function _determineWinner(uint _tokenId) internal onlyOwner returns (address) {
+    function _determineWinner(uint _tokenId) internal view onlyOwner returns (address) {
         address topPRAuthor;
         // find AN author with the max vote value.
         address[] memory thisPRauthors = PRauthors[_tokenId];
@@ -249,19 +248,22 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 topPRAuthor = thisPRauthors[i];
             }
         }
+        address[100] memory topPRAuthors;
         // determine ALL addresses with the same max vote value in event of a tie.
         uint maxVotes = PRs[_tokenId][topPRAuthor].totalVotes;
+        uint numAuthorsTied = 0;
         for (uint i = 0; i < thisPRauthors.length; i++) {
             if (PRs[_tokenId][thisPRauthors[i]].totalVotes == maxVotes) {
-                topPRAuthors[_tokenId].push(thisPRauthors[i]);
+                topPRAuthors[numAuthorsTied] = thisPRauthors[i];
+                numAuthorsTied++;
             }
         }
         // if all totalVotes were <= 0, no PR is approved, return 0 address.
         if (maxVotes > 0) {
-            if (topPRAuthors[_tokenId].length != 1) {
+            if (numAuthorsTied != 1) {
                 // TODO determine the winner of the tie
                 // for now, just pick the first one
-                topPRAuthor = topPRAuthors[_tokenId][0];
+                topPRAuthor = topPRAuthors[0];
                 return topPRAuthor;
             }
             else {

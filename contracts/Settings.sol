@@ -16,6 +16,7 @@ contract Settings is Ownable {
     uint public MinimumPRPrice;
     uint public MinimumInitialPrice;
     uint public MinimumInitialSupply;
+    uint public immutable MaxPRs;
 
     event NewMinimumPRPrice(uint amount);
     event NewMinimumInitialPrice(uint amount);
@@ -31,6 +32,7 @@ contract Settings is Ownable {
         MinimumPRPrice = 0.01 * 10 ** 18; //0.01 ETH, in wei
         MinimumInitialPrice = 0.1 * 10 ** 18; //0.1 ETH, in wei
         MinimumInitialSupply = 10 ** 18;
+        MaxPRs = 20;
     }
 
     function _setVotingDuration(uint _duration) external onlyOwner() {

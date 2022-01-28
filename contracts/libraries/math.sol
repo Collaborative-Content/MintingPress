@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 library mathUtils{
   function roundDivision(uint256 n, uint256 d) internal pure returns(uint256) {
