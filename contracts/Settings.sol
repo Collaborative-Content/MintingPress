@@ -56,5 +56,5 @@ contract Settings is Ownable {
     function _setMinimumInitialSupply(uint _supply) external onlyOwner() {
         MinimumInitialSupply = _supply;
         emit NewMinimumSupply(MinimumInitialSupply);
-}
+    }
 }

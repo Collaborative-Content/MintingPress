@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./Settings.sol";
 
 contract AdminProxy is Ownable {
@@ -19,6 +20,7 @@ contract AdminProxy is Ownable {
 
     constructor(address _settings) {
         settings = Settings(_settings);
+
     }
 
     // @notice Order of the round is as follows:

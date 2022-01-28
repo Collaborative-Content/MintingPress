@@ -75,6 +75,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     event NoPRApproved(uint tokenID);
     event NewPR(address PRowner, uint tokenID, uint PRPrice, uint ownershipTokensToMint);
     event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
+    event NewContentMinted(uint tokenID, address creator);
 
     constructor(address _adminAddr,
                 address _settingsAddr 
@@ -134,16 +135,23 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
     
     // @params data - story, symbol - fungible token 
-    function mint(bytes memory data, uint totalSupply, uint minPRPrice, uint ownerStake, bytes memory tokenSymbol) external {
+    function mint(bytes memory data, uint totalSupply, uint minPRPrice, uint ownerStake, bytes memory tokenSymbol) external payable {
         // PUT IN BONDING CURVE METHOD
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
+        require(msg.value >= settings.MinimumInitialPrice(), "Not enough ETH to mint content");
+        require(totalSupply >= settings.MinimumInitialSupply(), "Total Supply too low");
+        require(ownerStake <= totalSupply, "Owner stake must be less than supply");
+        
         setBondingCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
 
         // TODO other checks on bonding curve based on additional settings
 
+
         super._mint(contentContract, contentTokenID, 1, data); // non fungible
         _mintOwnership(msg.sender, contentTokenID-1, bondingCurveParams[contentTokenID-1].ownerStake, bondingCurveParams[contentTokenID - 1].tokenSymbol);   // fungible
+        emit NewContentMinted(contentTokenID, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
+
     }
 
     function _mintOwnership(address to, uint id, uint amount, bytes memory data) internal {

@@ -24,39 +24,11 @@ describe("Content Contract constructor & setup", function () {
     });
 
     it("should assert the owner (admin) of the contract", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, 
-            "hi I'm your original content", creator.address, 10**6, ethers.BigNumber.from("1000000000000000000"), 
-            ethers.BigNumber.from("10000000000000000"));
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address);
         await contentContract.deployed();
         expect(await contentContract.owner()).to.equal(owner.address);
     });
 
-    // first author has exactly one ownership token
-    it("should assert that author has exactly one ownership token", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, 
-            "hi I'm your original content", creator.address, 10**6, ethers.BigNumber.from("1000000000000000000"), 
-            ethers.BigNumber.from("10000000000000000"));
-        await contentContract.deployed();
-        expect(await contentContract.balanceOf(creator.address, 0)).to.equal(1);
-    });
-
-    it("should contain the original content", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, 
-            "hi I'm your original content", creator.address, 10**6, ethers.BigNumber.from("1000000000000000000"), 
-            ethers.BigNumber.from("10000000000000000"));
-        await contentContract.deployed();
-        contentToken = await contentContract.contentTokenID();
-        expect(contentToken).to.eq(1);
-        expect(await contentContract.contentData(contentToken)).to.equal("hi I'm your original content");
-    });
-
-    it("should revert if PR price is too low", async function () {
-        await expect(ContentContract.deploy(adminContract.address, settingsContract.address, 
-            "hi I'm your original content", creator.address, 100000, 10000, 1000))
-            .to.be.revertedWith("Min PR Price is too low");
-        // token supply is too low?
-        // initial price is too low?
-    });
 
 
 });
@@ -82,15 +54,58 @@ describe("Content Contract functions", function () {
         await adminContract.deployed(); 
 
         ContentContract = await ethers.getContractFactory("Content");
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, 
-            "hi I'm your original content", creator.address, 10**6, ethers.BigNumber.from("1000000000000000000"), 
-            ethers.BigNumber.from("10000000000000000"));
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address);
         await contentContract.deployed();
     });
 
 
-     
+    describe("creator new content", function () {
+    
+        // first author has exactly one ownership token
+        it("should assert that new content created, author with correct stake and content is correct", async function () {
+            ownerStake=10**5;
+            supply= 10**18;
+            initialprice=ethers.BigNumber.from("100000000000000000");
+            await expect(contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, 
+            initialprice, ownerStake, "HIITME"))
+            .to.emit(contentContract, "NewContentMinted").withArgs(0, creator.address);
+            expect(await contentContract.balanceOf(creator.address, 0)).to.equal(ownerStake);
+            expect(await contentContract.contentData(contentToken)).to.equal("hi I'm your original content");
+        });
 
+        it("should revert if ownerstake greater than supply", async function () {
+            ownerStake=10**5;
+            supply=10**4;
+            initialprice=ethers.BigNumber.from("100000000000000000");
+            expect(await contentContract.connect(creator).mint(bytes("hi I'm your original content"), 
+            supply, initialprice, ownerStake, "HIITME"))
+            .to.be.revertedWith("Owner stake must be less than supply");
+
+            //require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
+            //require(msg.value >= settings.MinimumInitialPrice(), "Not enough ETH to mint content");
+            //require(totalSupply >= settings.MinimumTotalSupply(), "Total Supply too low");
+        });
+
+
+        it("should revert if PR price,initial price, or supply is too low", async function () {
+            ownerStake=10**5;
+            supply= 10**6;
+            initialprice=ethers.BigNumber.from("100000000000000000");
+            await expect(contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, 
+            1000, ownerStake, "HIITME"))
+            .to.be.revertedWith("Min PR Price is too low");
+            // token supply is too low?
+            // initial price is too low?
+        });
+
+        it("should revert if owner stake too high", async function () {
+            await expect(ContentContract.deploy(adminContract.address, settingsContract.address, 
+                "hi I'm your original content", creator.address, 100000, 10000, 1000))
+                .to.be.revertedWith("Min PR Price is too low");
+            // token supply is too low?
+            // initial price is too low?
+        });
+    });
     
     // PR submitted tests
 
