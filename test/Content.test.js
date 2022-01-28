@@ -145,6 +145,9 @@ describe("Content Contract functions", function () {
         beforeEach(async function () {
             await contentContract.connect(creator)
                 .mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
+            overridesWithETH_PR = {
+                value: ethers.utils.parseEther("0.5")
+            };
         });
 
         it("should revert when not in PR window", async function () {
@@ -165,13 +168,13 @@ describe("Content Contract functions", function () {
         it("should update PRs when in PR window, for two people", async function () {           
             expect(await adminContract.connect(owner).startContributionPeriod()
                 ).to.emit(adminContract, "ContributionsOpen").withArgs();
-            let PRtext1 = "testPR uno";
-            let PRtext2 = "testPR numba two";
-            let tokenID = 1;
-            console.log(overridesWithETH);
-            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
-            console.log("DONEZO1");
-            await contentContract.connect(pR2).submitPR(PRtext2, tokenID);
+            PRtext1 = "testPR uno";
+            PRtext2 = "testPR numba two";
+            tokenID = 1;
+            // console.log(overridesWithETH_PR);
+            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH_PR);   // submit PR
+            console.log("reached");
+            await contentContract.connect(pR2).submitPR(PRtext2, tokenID, overridesWithETH_PR);
             console.log("DONEZO1");
             expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(PRtext1);    // check PR text is persisted
             console.log("DONEZO1");

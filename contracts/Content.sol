@@ -104,14 +104,14 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         super._mint(to, id, amount, data);
     }
 
-    function submitPR(string memory _PRtext, uint tokenID) external payable {
+    function submitPR(string memory _PRtext, uint _contentTokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
-        require(msg.value >= bondingCurve.getMinPRPrice(tokenID), "ETH Value is below minimum PR price");
-        require(!PRsContract.getPRexists(msg.sender, tokenID), "Address has already submitted a PR for this content within this contribution period");
+        require(msg.value >= bondingCurve.getMinPRPrice(_contentTokenID-1), "ETH Value is below minimum PR price");
+        require(!PRsContract.getPRexists(msg.sender, _contentTokenID), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
-        PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
-        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, tokenID), msg.sender, tokenID);
-        emit NewPR(msg.sender, tokenID, msg.value, amount);
+        PRsContract.submitPR(_PRtext, _contentTokenID, msg.sender, msg.value);
+        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, _contentTokenID), msg.sender, _contentTokenID-1);
+        emit NewPR(msg.sender, _contentTokenID, msg.value, amount);
     }
 
     // TODO function for admin to assign vote credits at start of voting; Otherwise there is a bug 
