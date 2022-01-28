@@ -4,8 +4,8 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "./libraries/utils.sol";
 
+import "./libraries/math.sol";
 import "./PullRequests.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
@@ -66,6 +66,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function onERC1155Received(address operator, address from, uint id, uint value, bytes calldata data) 
     external returns (bytes4) {
              contentData[id] = data;
+             return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }
 
     function onERC1155BatchReceived(
@@ -105,10 +106,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
 
     function submitPR(string memory _PRtext, uint tokenID) external payable {
-        require(adminProxy.contributionsOpen(), 
-                "Contributions are currently closed");
-        require((msg.value >= bondingCurveParams[tokenID].minPRPrice), 
-                "ETH Value is below minimum PR price");
+        require(adminProxy.contributionsOpen(), "Contributions are currently closed");
+        require(msg.value >= bondingCurveParams[tokenID].minPRPrice, "ETH Value is below minimum PR price");
+        require(!(PRsContract.getPRexists()[tokenID][msg.sender]), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
         PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
         uint amount = bondingCurve.calculatePurchaseReturn(PRs[tokenID][msg.sender].PRPrice, msg.sender, tokenID);
