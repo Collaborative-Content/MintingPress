@@ -183,18 +183,17 @@ describe("Content Contract functions", function () {
         
         // should revert when not in voting window
         it("should revert when not in voting window", async function () {
-            await adminContract.connect(owner).startContributionPeriod();
+            // await adminContract.connect(owner).startContributionPeriod();
             tokenID = 1;
             await expect(
-                contentContract.connect(creator).vote("", 1, true)
+                contentContract.connect(creator).vote(pR1, 1, true, tokenID)
             ).to.be.revertedWith("Cannot vote during contribution period");
         });
 
         // should revert when non-author tries to vote on some content
         it("should revert when non-author tries to vote", async function () {
-            await adminContract.connect(owner).startContributionPeriod();
-            let PR1 = await contentContract.connect(creator).submitPR("I am PR1");
             await adminContract.connect(owner).startVotingPeriod();
+
             await expect(
                 contentContract.connect(noncreator).vote(PR1, 1, true)
             ).to.be.revertedWith("Non-authors not allowed to vote on PRs");
@@ -203,7 +202,7 @@ describe("Content Contract functions", function () {
         // should revert when author tries to cast more votes than they have
         it("should revert when author tries to cast more votes than they have available", async function () {
             await adminContract.connect(owner).startContributionPeriod();
-            let PR1 = await contentContract.connect(creator).submitPR("I am PR1");
+
             await adminContract.connect(owner).startVotingPeriod();
             await contentContract.connect(creator).vote(PR1, 1);
             await contentContract.connect(owner).approvePR(PR1); 
@@ -213,6 +212,14 @@ describe("Content Contract functions", function () {
             await expect(
                 contentContract.connect(creator).vote(PR2, 50)
             ).to.be.revertedWith("Not allowed to cast more votes than those available");
+        });
+
+        it("should revert when not in voting window", async function () {
+            // await adminContract.connect(owner).startContributionPeriod();
+            tokenID = 1;
+            await expect(
+                contentContract.connect(creator).vote("", 1, true)
+            ).to.be.revertedWith("Cannot vote during contribution period");
         });
         
     });

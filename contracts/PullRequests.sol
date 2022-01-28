@@ -32,7 +32,7 @@ contract PullRequests is Ownable {
     }
 
     function submitPR(string memory _PRtext, uint tokenID, address caller, uint value) external onlyOwner {
-        require(!PRexists[tokenID][caller], "Existing PR");
+        // require(!PRexists[tokenID][caller], "Existing PR");
         PRauthors[tokenID].push(caller);
         PRs[tokenID][caller] = PR({content: bytes(_PRtext), 
                                        blockTimestamp: block.timestamp,
@@ -113,6 +113,10 @@ contract PullRequests is Ownable {
 
     function getPrice(address _PRowner, uint tokenID) view external returns (uint) {
         return PRs[tokenID][_PRowner].PRPrice;
+    }
+
+    function getPRexists(address _PRowner, uint tokenID) view external returns(bool) {
+        return PRexists[tokenID][_PRowner];
     }
 
 }
