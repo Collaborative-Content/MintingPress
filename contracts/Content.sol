@@ -122,7 +122,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         
         setBondingCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
         super._mint(contentContract, contentTokenID, 1, data); // non fungible
-        _mintOwnership(msg.sender, contentTokenID-1, bondingCurveParams[contentTokenID-1].ownerStake, bondingCurveParams[contentTokenID - 1].tokenSymbol);   // fungible
+        _mintOwnership(msg.sender, contentTokenID-1, ownerStake, tokenSymbol);   // fungible
         emit NewContentMinted(contentTokenID, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
     }
