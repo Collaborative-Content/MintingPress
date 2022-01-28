@@ -64,27 +64,28 @@ describe("Content Contract functions", function () {
         ContentContract = await ethers.getContractFactory("Content");
         contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
         await contentContract.deployed();
+        ownerStake=10**5;
+        supply= 10**18;
+        initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
+        encoder = new TextEncoder();
+        tempData = encoder.encode("hi I'm your original content");
     });
 
 
     describe("creator new content", function () {
         
         it("should assert that new content created, author with correct stake and content is correct", async function () {
-            ownerStake=10**5;
-            supply= 10**18;
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            await expect(contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, 
+
+            await expect(contentContract.connect(creator).mint(tempdata, supply, 
             initialprice, ownerStake, "HIITME"))
             .to.emit(contentContract, "NewContentMinted").withArgs(0, creator.address);
             expect(await contentContract.balanceOf(creator.address, 0)).to.equal(ownerStake);
-            expect(await contentContract.contentData(contentToken)).to.equal("hi I'm your original content");
+            expect(await contentContract.contentData(contentToken)).to.equal(tempData);
         });
 
         it("should revert if ownerstake greater than supply", async function () {
-            ownerStake=10**5;
             supply=10**4;
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            expect(await contentContract.connect(creator).mint(bytes("hi I'm your original content"), 
+            expect(await contentContract.connect(creator).mint(tempData, 
             supply, initialprice, ownerStake, "HIITME"))
             .to.be.revertedWith("Owner stake must be less than supply");
 
@@ -95,11 +96,9 @@ describe("Content Contract functions", function () {
 
 
         it("should revert if PR price,initial price, or supply is too low", async function () {
-            ownerStake=10**5;
-            supply= 10**6;
-            initialprice=ethers.BigNumber.from("100000000000000000");
+            initialprice = 1000;
             await expect(contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, 
-            1000, ownerStake, "HIITME"))
+            initialprice, ownerStake, "HIITME"))
             .to.be.revertedWith("Min PR Price is too low");
             // token supply is too low?
             // initial price is too low?
@@ -116,7 +115,7 @@ describe("Content Contract functions", function () {
         it("should assert that tokenID assigned to contract equals 1", async function () {
             ownerStake=10**5;
             supply= 10**18;
-            initialprice=ethers.BigNumber.from("100000000000000000");
+            initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
             await contentContract.connect(creator).mint(bytes("hi"), supply, initialprice, ownerStake, "UNO");
             expect(await contentContract.balanceOf(contentContract.address, 1)).to.equal(1);
         });
@@ -130,7 +129,7 @@ describe("Content Contract functions", function () {
         beforeEach(async function () {
             ownerStake=10**5;
             supply= 10**18;
-            initialprice=ethers.BigNumber.from("100000000000000000");
+            initialprice=10**18; //ethers.BigNumber.from("100000000000000000");
             await contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, initialprice, ownerStake, "HIITME");
         });
 
@@ -172,8 +171,10 @@ describe("Content Contract functions", function () {
         beforeEach(async function () {
             ownerStake=10**5;
             supply= 10**18;
-            initialprice=ethers.BigNumber.from("100000000000000000");
-            await contentContract.connect(creator).mint(bytes("hi I'm your original content"), supply, initialprice, ownerStake, "HIITME");
+            initialprice=10**18;//ethers.BigNumber.from("100000000000000000");
+            let encoder = new TextEncoder();
+            let tempData = encoder.encode("hi I'm your original content");
+            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, "HIITME");
             await adminContract.connect(owner).startContributionPeriod();
             
             PRtext1 = "testPR uno";
