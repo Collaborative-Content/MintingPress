@@ -33,7 +33,7 @@ contract BondingCurve {
   ) public {
     CurveParams memory temp;
     temp.tokenSymbol = _tokenSymbol;
-    temp.tokenID = _tokenID;
+    temp.tokenID = _tokenID;  // fungible token ID
     temp.totalSupply = _totalSupply;
     temp.ownerStake = _ownerStake;
     temp.minPRPrice = _minPRPrice;
