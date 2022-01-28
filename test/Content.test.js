@@ -20,6 +20,10 @@ describe("Content Contract constructor & setup", function () {
         adminContract = await AdminContract.deploy(settingsContract.address);
         await adminContract.deployed(); 
 
+        BondingCurve = await ethers.getContractFactory("BondingCurve");
+        bondingCurve = await BondingCurve.deploy();
+        await bondingCurve.deployed();
+
         PullRequests = await ethers.getContractFactory("PullRequests");
         prContract = await PullRequests.deploy();
         await prContract.deployed(); 
@@ -28,7 +32,7 @@ describe("Content Contract constructor & setup", function () {
     });
 
     it("should assert the owner (admin) of the contract", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
         await contentContract.deployed();
         expect(await contentContract.owner()).to.equal(owner.address);
     });
@@ -61,13 +65,18 @@ describe("Content Contract functions", function () {
         prContract = await PullRequests.deploy();
         await prContract.deployed();
 
+        BondingCurve = await ethers.getContractFactory("BondingCurve");
+        bondingCurve = await BondingCurve.deploy();
+        await bondingCurve.deployed();
+
         ContentContract = await ethers.getContractFactory("Content");
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address);
+        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
         await contentContract.deployed();
         ownerStake=5* 10**5;
         supply= 10**7;
         initialprice=ethers.BigNumber.from("100000000000000000");
         encoder = new TextEncoder();
+        decoder = new TextDecoder();
         tempData = encoder.encode("hi I'm your original content");
         tokensymbol = encoder.encode("HIITME");
         overridesWithETH = {
@@ -88,11 +97,13 @@ describe("Content Contract functions", function () {
             // console.log(await contentContract.connect(creator).calculatePurchaseReturn(
             //     initialprice, creator.address, 2));
 
+            // first token to be minted will be 0 
+            ownerToken = 0;
             await expect(contentContract.connect(creator).mint(tempData, supply, 
             initialprice, ownerStake, tokensymbol, overridesWithETH))
-            .to.emit(contentContract, "NewContentMinted").withArgs(0, creator.address);
-            expect(await contentContract.balanceOf(creator.address, 0)).to.equal(ownerStake);
-            expect(await contentContract.contentData(contentToken)).to.equal(tempData);
+            .to.emit(contentContract, "NewContentMinted").withArgs(ownerToken, creator.address);
+            expect(await contentContract.balanceOf(creator.address, ownerToken)).to.equal(ownerStake);
+            expect(await contentContract.contentData(ownerToken+1)).to.equal(tempData);
         });
 
         it("should revert if ownerstake greater than supply", async function () {

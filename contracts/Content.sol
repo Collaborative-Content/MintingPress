@@ -32,7 +32,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     // TODO can we remove outstandingFungibleBalance and replace with balanceof() from ERC1155?
     mapping( uint => mapping( address => uint )) outstandingFungibleBalance; 
-    mapping(uint => mapping(address => uint)) public voteCredits;
 
     // TODO implement completion vote
     mapping(uint => mapping(address => bool)) votesToComplete;
@@ -90,13 +89,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(totalSupply >= settings.MinimumInitialSupply(), "Total Supply too low");
         require(ownerStake <= totalSupply, "Owner stake must be less than supply");
         
-        bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, ownerStake,  minPRPrice, totalSupply);
+        bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice);
         super._mint(contentContract, contentTokenID, 1, data); // non fungible
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
                        bondingCurve.getOwnerStake(contentTokenID-1), 
                        bondingCurve.getTokenSymbol(contentTokenID-1));   // fungible
-        emit NewContentMinted(contentTokenID, msg.sender);
+        emit NewContentMinted(contentTokenID-1, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
     }
 
@@ -107,11 +106,11 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     function submitPR(string memory _PRtext, uint tokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
-        require(msg.value >= bondingCurveParams[tokenID].minPRPrice, "ETH Value is below minimum PR price");
-        require(!(PRsContract.getPRexists()[tokenID][msg.sender]), "Address has already submitted a PR for this content within this contribution period");
+        require(msg.value >= bondingCurve.getMinPRPrice(tokenID), "ETH Value is below minimum PR price");
+        require(!(PRsContract.getPRexists(msg.sender, tokenID)), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
         PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
-        uint amount = bondingCurve.calculatePurchaseReturn(PRs[tokenID][msg.sender].PRPrice, msg.sender, tokenID);
+        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, tokenID), msg.sender, tokenID);
         emit NewPR(msg.sender, tokenID, msg.value, amount);
     }
 
@@ -166,7 +165,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         contentData[_contentTokenId] = winningContent;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
-        uint amount = bondingCurve.calculatePurchaseReturn(winningPR.PRPrice, _PRwinner, ownershipTokenId);
+        uint amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
     }
 }
