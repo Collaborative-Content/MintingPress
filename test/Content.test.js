@@ -154,16 +154,17 @@ describe("Content Contract functions", function () {
         it("should revert when not in PR window", async function () {
             let PRtext = "testPR";
             let tokenID = 1;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
 
         it("should revert when submitting PR for nonexistent content", async function () {
-            PRtext = "testPR";
+            await adminContract.connect(owner).startContributionPeriod();
+            PRtext = "testPR nonexistent";
             tokenID = 3;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
-                ).to.be.revertedWith("Contributions are currently closed");
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
+                ).to.be.revertedWith("Content doesn't exist");
         });
         
         it("should update PRs when in PR window, for two people", async function () {           
