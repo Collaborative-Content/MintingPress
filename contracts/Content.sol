@@ -38,8 +38,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     AdminProxy immutable adminProxy;
     Settings immutable settings;
-    PullRequests PRsContract;
-    //address private PRsAddress;
+    PullRequests immutable PRsContract;
     address public contentContract;
 
     // content mapping
