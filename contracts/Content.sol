@@ -7,19 +7,9 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./libraries/math.sol";
 import "./libraries/utils.sol";
 
+import "./PullRequests.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
-
-interface IPullRequests {
-
-    function getContent(address _PRowner, uint tokenID) view external returns (bytes memory);
-    function getPrice(address _PRowner, uint tokenID) view external returns (uint);
-    function submitPR(string memory _PRtext, uint tokenID, address caller, uint value) external;
-    function determineWinner(uint _tokenId) external view returns (address);
-    function clearPRs(uint tokenId) external;
-    function tallyVotes(uint _tokenId) external;
-    function votePR(address _PRowner, uint _numVotes, bool positive, uint tokenId) external;
-}
 
 contract Content is ERC1155, Ownable, IERC1155Receiver{
     //using BondingCurveLib for BondingCurveLib.BondingCurve;
@@ -48,7 +38,8 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     AdminProxy immutable adminProxy;
     Settings immutable settings;
-    address private PRsAddress;
+    PullRequests PRsContract;
+    //address private PRsAddress;
     address public contentContract;
 
     // content mapping
@@ -79,7 +70,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 address _PRsAddr
                 ) 
                 ERC1155("") {
-        PRsAddress = _PRsAddr;
+        PRsContract = new PullRequests();
         settings = Settings(_settingsAddr);
         adminProxy = AdminProxy(_adminAddr);
         contentContract = address(this);
@@ -147,7 +138,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require((msg.value >= bondingCurveParams[tokenID].minPRPrice), 
                 "ETH Value is below minimum PR price");
         // What happens if reverts inside below call? 
-        IPullRequests(PRsAddress).submitPR(_PRtext, tokenID, msg.sender, msg.value);
+        PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
         uint amount = calculatePurchaseReturn(msg.value, msg.sender, tokenID);
         emit NewPR(msg.sender, tokenID, msg.value, amount);
     }
@@ -166,7 +157,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(adminProxy.votingOpen(), "Voting is currently closed");
         //voteCredits[tokenId][msg.sender] == outstandingFungibleBalance[tokenId][msg.sender] ** 2;
         require((_numVotes <= voteCredits[tokenId][msg.sender]), "Not enough vote credits");
-        IPullRequests(PRsAddress).votePR(_PRowner, _numVotes, positive, tokenId);
+        PRsContract.votePR(_PRowner, _numVotes, positive, tokenId);
         voteCredits[tokenId][msg.sender] -= (_numVotes ** 2); 
         emit Voted(msg.sender, _PRowner, _numVotes, positive, tokenId);
     }
@@ -184,22 +175,22 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         uint _id = 1;   // start with the first piece of content
         while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
-            IPullRequests(PRsAddress).tallyVotes(_id);
-            address PRwinner = IPullRequests(PRsAddress).determineWinner(_id);
+            PRsContract.tallyVotes(_id);
+            address PRwinner = PRsContract.determineWinner(_id);
             if (PRwinner != address(0)) {
                 _modifyContentandMint(_id, PRwinner);
                 emit PRApproved(tokenID, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
                 emit NoPRApproved(tokenID);
             }
-            IPullRequests(PRsAddress).clearPRs(_id);
+            PRsContract.clearPRs(_id);
             _id = _id+2;
         }
     }
 
     function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
-        bytes memory winningContent = IPullRequests(PRsAddress).getContent(_PRwinner, _contentTokenId);
-        uint winningPRPrice = IPullRequests(PRsAddress).getPrice(_PRwinner, _contentTokenId);
+        bytes memory winningContent = PRsContract.getContent(_PRwinner, _contentTokenId);
+        uint winningPRPrice = PRsContract.getPrice(_PRwinner, _contentTokenId);
         contentData[_contentTokenId] = winningContent;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
