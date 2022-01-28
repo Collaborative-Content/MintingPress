@@ -107,7 +107,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function submitPR(string memory _PRtext, uint tokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
         require(msg.value >= bondingCurve.getMinPRPrice(tokenID), "ETH Value is below minimum PR price");
-        require(!(PRsContract.getPRexists(msg.sender, tokenID)), "Address has already submitted a PR for this content within this contribution period");
+        require(!PRsContract.getPRexists(msg.sender, tokenID), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
         PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
         uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, tokenID), msg.sender, tokenID);

@@ -143,34 +143,44 @@ describe("Content Contract functions", function () {
     describe("PR submitted", function () {
 
         beforeEach(async function () {
-            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
+            await contentContract.connect(creator)
+                .mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
         });
 
         it("should revert when not in PR window", async function () {
-            PRtext = "testPR";
-            tokenID = 1;
-            expect(await contentContract.connect(creator).submitPR(PRtext, tokenID)
+            let PRtext = "testPR";
+            let tokenID = 1;
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
-        
-        it("should update PRs when in PR window, for two people", async function () {
-            // TODO contributions not locked 
-            
-            // await adminContract.connect(account0).startContributionPeriod();
-            // await expect(adminContract.isContributionsPeriod().to.equal(true));
 
-            await adminContract.connect(owner).startContributionPeriod();
-            PRtext1 = "testPR uno";
-            PRtext2 = "testPR numba two";
-            tokenID = 1;
-            await contentContract.connect(pR1).submitPR(PRtext1, tokenID);   // submit PR
+        it("should revert when submitting PR for nonexistent content", async function () {
+            PRtext = "testPR";
+            tokenID = 3;
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
+                ).to.be.revertedWith("Contributions are currently closed");
+        });
+        
+        it("should update PRs when in PR window, for two people", async function () {           
+            expect(await adminContract.connect(owner).startContributionPeriod()
+                ).to.emit(adminContract, "ContributionsOpen").withArgs();
+            let PRtext1 = "testPR uno";
+            let PRtext2 = "testPR numba two";
+            let tokenID = 1;
+            console.log(overridesWithETH);
+            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
+            console.log("DONEZO1");
             await contentContract.connect(pR2).submitPR(PRtext2, tokenID);
+            console.log("DONEZO1");
             expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(PRtext1);    // check PR text is persisted
+            console.log("DONEZO1");
             expect(await prContract.PRs()[tokenID][pR2].content()).to.equal(PRtext2);
+            console.log("DONEZO1");
             expect(await prContract.PRexists()[tokenID][pR1]).to.equal(true);
+            console.log("DONEZO1");
             expect(await prContract.PRexists()[tokenID][pR2]).to.equal(true);
-            // PR block timestamp within PR window
+            console.log("DONEZO1");
         });
 
     });
