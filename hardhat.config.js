@@ -2,6 +2,7 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
  require("@nomiclabs/hardhat-waffle");
+ require('hardhat-contract-sizer');
  require("dotenv").config();
  
  // Possible network values
