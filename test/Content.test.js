@@ -85,8 +85,8 @@ describe("Content Contract functions", function () {
                 //         value: ethers.utils.parseEther("1.0"),
                 //       });
                 
-            console.log(await contentContract.connect(creator).calculatePurchaseReturn(
-                initialprice, creator.address, 2));
+            // console.log(await contentContract.connect(creator).calculatePurchaseReturn(
+            //     initialprice, creator.address, 2));
 
             await expect(contentContract.connect(creator).mint(tempData, supply, 
             initialprice, ownerStake, tokensymbol, overridesWithETH))
