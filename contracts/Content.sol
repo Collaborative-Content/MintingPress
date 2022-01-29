@@ -78,9 +78,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         bytes calldata data
     ) external returns (bytes4) {}
 
-    function append(string calldata a, string calldata b, string calldata c) internal pure returns (string memory) {
-        return string(abi.encodePacked(a, b, c));
-    }
+    // function append(string calldata a, string calldata b, string calldata c) internal pure returns (string memory) {
+    //     return string(abi.encodePacked(a, b, c));
+    // }
     
     // @params data - story, symbol - fungible token 
     function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {
@@ -92,7 +92,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(ownerStake <= totalSupply, "Owner stake must be less than supply");
         
         bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice); // token ID is fungible token
-        super._mint(contentContract, contentTokenID, 1, data); // non fungible
+        super._mint(contentAddress, contentTokenID, 1, data); // non fungible
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
                        bondingCurve.getOwnerStake(contentTokenID-1), 
@@ -106,7 +106,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         super._mint(to, id, amount, data);
     }
 
-    function submitPR(string memory _PRtext, uint _contentTokenID) external payable {
+    function submitPR(bytes memory _PRtext, uint _contentTokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
         require(_contentTokenID < contentTokenID, "Content doesn't exist");
         require(msg.value >= bondingCurve.getMinPRPrice(_contentTokenID-1), "ETH Value is below minimum PR price");
@@ -164,7 +164,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
         bytes memory winningContent = PRsContract.getContent(_PRwinner, _contentTokenId);
         uint winningPRPrice = PRsContract.getPrice(_PRwinner, _contentTokenId);
-        contentData[_contentTokenId] = winningContent;//bytes(append((contentData[_contentTokenId]), string("\n\n"), string(winningPR.content)));
+        contentData[_contentTokenId] = bytes.concat(contentData[_contentTokenId], " ", winningContent);  // contentData[_contentTokenId] = winningContent;
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
         uint amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);

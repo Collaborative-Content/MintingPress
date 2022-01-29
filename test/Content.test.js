@@ -85,11 +85,17 @@ describe("Content Contract functions", function () {
         initialprice=ethers.BigNumber.from("100000000000000000");
         encoder = new TextEncoder();
         decoder = new TextDecoder();
-        tempData = encoder.encode("hi I'm your original content");
+        tempData = encoder.encode("hi I am your original content");
+        prData1 = encoder.encode("I am PR one");
+        prData2 = encoder.encode("I am PR two");
         tokensymbol = encoder.encode("HIITME");
         overridesWithETH = {
             value: ethers.utils.parseEther("1.0")
         };
+        overridesWithETH_PR = {
+            value: ethers.utils.parseEther("0.5")
+        };
+
     });
 
 
@@ -154,41 +160,34 @@ describe("Content Contract functions", function () {
         beforeEach(async function () {
             await contentContract.connect(creator).mint(
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
-            overridesWithETH_PR = {
-                value: ethers.utils.parseEther("0.5")
-            };
         });
 
         it("should revert when not in PR window", async function () {
-            let PRtext = "testPR";
-            let tokenID = 1;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
+            tokenID = 1;
+            expect(await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
 
         it("should revert when submitting PR for nonexistent content", async function () {
             await adminContract.connect(owner).startContributionPeriod();
-            PRtext = "testPR nonexistent";
             tokenID = 3;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
+            expect(await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Content doesn't exist");
         });
         
         it("should update PRs when in PR window, for two people", async function () {           
             expect(await adminContract.connect(owner).startContributionPeriod()
                 ).to.emit(adminContract, "ContributionsOpen").withArgs();
-            PRtext1 = "testPR uno";
-            PRtext2 = "testPR numba two";
             tokenID = 1;
             // console.log(overridesWithETH_PR);
-            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
+            await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   // submit PR
             console.log("reached");
-            await contentContract.connect(pR2).submitPR(PRtext2, tokenID, overridesWithETH);
+            await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
             console.log("DONEZO1");
-            expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(PRtext1);    // check PR text is persisted
+            expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(prData1);    // check PR text is persisted
             console.log("DONEZO1");
-            expect(await prContract.PRs()[tokenID][pR2].content()).to.equal(PRtext2);
+            expect(await prContract.PRs()[tokenID][pR2].content()).to.equal(prData2);
             console.log("DONEZO1");
             expect(await prContract.PRexists()[tokenID][pR1]).to.equal(true);
             console.log("DONEZO1");
@@ -209,11 +208,11 @@ describe("Content Contract functions", function () {
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
             await adminContract.connect(owner).startContributionPeriod();
             
-            PRtext1 = "testPR uno";
-            PRtext2 = "testPR numba two";
-            tokenID = 1;
-            await contentContract.connect(pR1).submitPR(PRtext1, tokenID);   // submit PR
-            await contentContract.connect(pR2).submitPR(PRtext2, tokenID);
+            // PRtext1 = "testPR uno";
+            // PRtext2 = "testPR numba two";
+            // tokenID = 1;
+            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
+            await contentContract.connect(pR2).submitPR(PRtext2, tokenID, overridesWithETH);
         });
         
         // should revert when not in voting window
