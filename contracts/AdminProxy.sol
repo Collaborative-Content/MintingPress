@@ -4,10 +4,13 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./Settings.sol";
+import "./Content.sol";
 
 contract AdminProxy is Ownable {
     bool public contributionsOpen;
     bool public votingOpen;
+    Content public contentContract;
+    address public immutable contentAddress;
 
     uint lastPeriod;
     uint votingStartTime;
@@ -18,9 +21,10 @@ contract AdminProxy is Ownable {
     
     Settings private settings;
 
-    constructor(address _settings) {
-        settings = Settings(_settings);
-
+    constructor() {
+        settings = new Settings();
+        contentContract = new Content(address(this), address(settings));
+        contentAddress = address(contentContract);
     }
 
     // @notice Order of the round is as follows:
@@ -41,6 +45,7 @@ contract AdminProxy is Ownable {
     function startVotingPeriod() external onlyOwner {
         require(contributionsOpen && !votingOpen, "Voting must begin after contribution period");
         require(block.timestamp > contributionStartTime + settings.ContributionDuration(), "Voting cannot begin until end of contribution time");
+        
         contributionsOpen = false; 
         votingOpen = true;
         votingStartTime = block.timestamp;
