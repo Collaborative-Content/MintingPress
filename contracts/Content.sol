@@ -127,12 +127,12 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         }
     }
 
-    function vote(address _PRowner, uint _numVotes, bool positive, uint tokenId) external onlyAuthor(tokenId) {
+    function vote(address _PRowner, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
-        require((_numVotes <= voteCredits[tokenId][msg.sender]), "Not enough vote credits");
-        PRsContract.votePR(_PRowner, _numVotes, positive, tokenId);
-        voteCredits[tokenId][msg.sender] -= (_numVotes ** 2); 
-        emit Voted(msg.sender, _PRowner, _numVotes, positive, tokenId);
+        require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
+        PRsContract.votePR(_PRowner, _numVotes, positive, ownertokenId);
+        voteCredits[ownertokenId][msg.sender] -= (_numVotes ** 2); 
+        emit Voted(msg.sender, _PRowner, _numVotes, positive, ownertokenId+1);
     }
 
     function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {

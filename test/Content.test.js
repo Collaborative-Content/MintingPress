@@ -174,23 +174,16 @@ describe("Content Contract functions", function () {
             tokenID = 1;
             // console.log(overridesWithETH_PR);
             await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   // submit PR
-            console.log("reached");
             await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
-            console.log("DONEZO1");
             
             // todo figure out bytes 
             hex = await prContract.getContent(pR1.address, tokenID);
-            console.log(hex);
             text = Buffer.from((await prContract.getContent(pR1.address, tokenID)).slice(2,), 'hex').toString('utf8');
             expect(text).to.equal(decoder.decode(prData1));    // check PR text is persisted
-            console.log("DONEZO1");
             text2 = Buffer.from((await prContract.getContent(pR2.address, tokenID)).slice(2,), 'hex').toString('utf8');
             expect(text2).to.equal(decoder.decode(prData2));
-            console.log("DONEZO1");
             expect(await prContract.getPRexists(pR1.address, tokenID)).to.equal(true);
-            console.log("DONEZO1");
             expect(await prContract.getPRexists(pR2.address, tokenID)).to.equal(true);
-            console.log("DONEZO1");
         });
 
     });
@@ -254,6 +247,36 @@ describe("Content Contract functions", function () {
             ).to.be.revertedWith("Cannot vote during contribution period");
         });
         
+    });
+
+    describe("approving PR", function () {
+        beforeEach(async function () {
+            await contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
+            //console.log(await contentContract.balanceOf(creator.address, 0))
+            await adminContract.connect(owner).startContributionPeriod();
+            // submit PR
+            await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   
+            await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
+
+            function delay(ms) {
+                return new Promise( resolve => setTimeout(resolve, ms) );
+            }
+            await delay(5000);
+
+            await adminContract.connect(owner).startVotingPeriod();
+        });
+
+        it("should revert if not owner approving PR", async function () {
+            tokenID = 0;
+            await contentContract.connect(creator).vote(pR1.address, 1, true, tokenID);
+            await delay(5000);
+            await adminContract.connect(owner).endRound();
+            await expect(adminContract.votingOpen()).to.be.eq(false);
+            await expect(adminContract.contributionsOpen()).to.be.eq(false);
+
+
+        });
     });
 
 });
