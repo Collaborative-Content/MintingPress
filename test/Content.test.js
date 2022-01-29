@@ -93,7 +93,7 @@ describe("Content Contract functions", function () {
             value: ethers.utils.parseEther("1.0")
         };
         overridesWithETH_PR = {
-            value: ethers.utils.parseEther("0.5")
+            value: ethers.utils.parseEther("0.2")
         };
 
     });
@@ -101,15 +101,7 @@ describe("Content Contract functions", function () {
 
     describe("creator new content", function () {
         
-        it("should assert that new content created, author with correct stake and content is correct", async function () {
-
-            //await owner.sendTransaction({
-                //         to: contract.address,
-                //         value: ethers.utils.parseEther("1.0"),
-                //       });
-                
-            // console.log(await contentContract.connect(creator).calculatePurchaseReturn(
-            //     initialprice, creator.address, 2));
+        it("should assert that new content created, author with correct stake", async function () {
 
             // first token to be minted will be 0 
             ownerToken = 0;
@@ -117,7 +109,8 @@ describe("Content Contract functions", function () {
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
             .to.emit(contentContract, "NewContentMinted").withArgs(ownerToken, creator.address);
             expect(await contentContract.balanceOf(creator.address, ownerToken)).to.equal(ownerStake);
-            expect(await contentContract.contentData(ownerToken+1)).to.equal(tempData);
+            content0 = Buffer.from((await contentContract.contentData(ownerToken+1)).slice(2,), 'hex').toString('utf8');
+            expect(content0).to.equal(decoder.decode(tempData));
         });
 
         it("should revert if ownerstake greater than supply", async function () {
@@ -164,7 +157,7 @@ describe("Content Contract functions", function () {
 
         it("should revert when not in PR window", async function () {
             tokenID = 1;
-            expect(await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
+            await expect(contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
@@ -172,8 +165,7 @@ describe("Content Contract functions", function () {
         it("should revert when submitting PR for nonexistent content", async function () {
             await adminContract.connect(owner).startContributionPeriod();
             tokenID = 3;
-            expect(await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
-                ).to.be.revertedWith("Content doesn't exist");
+            await expect(contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)).to.be.revertedWith("Content does not exist");
         });
         
         it("should update PRs when in PR window, for two people", async function () {           
@@ -185,13 +177,19 @@ describe("Content Contract functions", function () {
             console.log("reached");
             await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
             console.log("DONEZO1");
-            expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(prData1);    // check PR text is persisted
+            
+            // todo figure out bytes 
+            hex = await prContract.getContent(pR1.address, tokenID);
+            console.log(hex);
+            text = Buffer.from((await prContract.getContent(pR1.address, tokenID)).slice(2,), 'hex').toString('utf8');
+            expect(text).to.equal(decoder.decode(prData1));    // check PR text is persisted
             console.log("DONEZO1");
-            expect(await prContract.PRs()[tokenID][pR2].content()).to.equal(prData2);
+            text2 = Buffer.from((await prContract.getContent(pR2.address, tokenID)).slice(2,), 'hex').toString('utf8');
+            expect(text2).to.equal(decoder.decode(prData2));
             console.log("DONEZO1");
-            expect(await prContract.PRexists()[tokenID][pR1]).to.equal(true);
+            expect(await prContract.getPRexists(pR1.address, tokenID)).to.equal(true);
             console.log("DONEZO1");
-            expect(await prContract.PRexists()[tokenID][pR2]).to.equal(true);
+            expect(await prContract.getPRexists(pR2.address, tokenID)).to.equal(true);
             console.log("DONEZO1");
         });
 
@@ -211,8 +209,8 @@ describe("Content Contract functions", function () {
             // PRtext1 = "testPR uno";
             // PRtext2 = "testPR numba two";
             // tokenID = 1;
-            await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
-            await contentContract.connect(pR2).submitPR(PRtext2, tokenID, overridesWithETH);
+            await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   // submit PR
+            await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
         });
         
         // should revert when not in voting window
@@ -220,7 +218,7 @@ describe("Content Contract functions", function () {
             // await adminContract.connect(owner).startContributionPeriod();
             tokenID = 1;
             await expect(
-                contentContract.connect(creator).vote(pR1, 1, true, tokenID)
+                contentContract.connect(creator).vote(pR1.address, 1, true, tokenID)
             ).to.be.revertedWith("Cannot vote during contribution period");
         });
 

@@ -38,7 +38,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     // TODO implement completion vote
     mapping(uint => mapping(address => bool)) votesToComplete;
 
-    event NewPR(address PRowner, uint tokenID, uint PRPrice, uint ownershipTokensToMint);
+    event NewPR(address PRowner, uint tokenID, uint PRPrice);
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
@@ -108,13 +108,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     function submitPR(bytes memory _PRtext, uint _contentTokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
-        require(_contentTokenID < contentTokenID, "Content doesn't exist");
+        require(_contentTokenID < contentTokenID, "Content does not exist");
         require(msg.value >= bondingCurve.getMinPRPrice(_contentTokenID-1), "ETH Value is below minimum PR price");
         require(!PRsContract.getPRexists(msg.sender, _contentTokenID), "Address has already submitted a PR for this content within this contribution period");
-        // What happens if reverts inside below call? 
         PRsContract.submitPR(_PRtext, _contentTokenID, msg.sender, msg.value);
-        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, _contentTokenID), msg.sender, _contentTokenID-1);
-        emit NewPR(msg.sender, _contentTokenID, msg.value, amount);
+        // future feature should add calculating amount that this PR owner would mint if they are approved (based on their PR price)
+        //uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, _contentTokenID), msg.sender, _contentTokenID-1);
+        emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
     // TODO function for admin to assign vote credits at start of voting; Otherwise there is a bug 

@@ -51,7 +51,7 @@ contract BondingCurve {
     require(price >= bondingCurveParams[_ownershipTokenId].minPRPrice, "Below the minimum value for the pull request");
     uint returnStake;
     returnStake = (bondingCurveParams[_ownershipTokenId].totalSupply - bondingCurveParams[_ownershipTokenId].ownerStake)*((mathUtils.ceilSqrt(1 + mathUtils.roundDivision((price * 10000),(bondingCurveParams[_ownershipTokenId].totalSupply-reserveCounter[_ownershipTokenId])))/100) - 1)/10;
-    //require(_reserveCounter + returnStake < _totalSupply, "No more tokens for sale, check back later!");
+    require(reserveCounter[_ownershipTokenId] + returnStake < bondingCurveParams[_ownershipTokenId].totalSupply, "No more tokens for sale, check back later!");
     reserveCounter[_ownershipTokenId] += returnStake;
     emit FungibleTokensEmitted(creator_address, _ownershipTokenId, returnStake, bondingCurveParams[_ownershipTokenId].tokenSymbol);
     return returnStake;
