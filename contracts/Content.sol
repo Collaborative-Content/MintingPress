@@ -142,7 +142,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     // ideally right before calling startContributionPeriod
     // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
     // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
-    function approvePRs(uint tokenID) external onlyOwner {
+    function approvePRs() external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         uint _id = 1;   // start with the first piece of content
@@ -151,9 +151,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
             address PRwinner = PRsContract.determineWinner(_id);
             if (PRwinner != address(0)) {
                 _modifyContentandMint(_id, PRwinner);
-                emit PRApproved(tokenID, PRwinner);
+                emit PRApproved(_id, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
-                emit NoPRApproved(tokenID);
+                emit NoPRApproved(_id);
             }
             PRsContract.clearPRs(_id);
             _id = _id+2;

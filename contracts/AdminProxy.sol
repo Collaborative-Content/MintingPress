@@ -45,7 +45,7 @@ contract AdminProxy is Ownable {
     function startVotingPeriod() external onlyOwner {
         require(contributionsOpen && !votingOpen, "Voting must begin after contribution period");
         require(block.timestamp > contributionStartTime + settings.ContributionDuration(), "Voting cannot begin until end of contribution time");
-        
+        contentContract._assignVoteCredits();
         contributionsOpen = false; 
         votingOpen = true;
         votingStartTime = block.timestamp;
@@ -55,6 +55,7 @@ contract AdminProxy is Ownable {
     function endRound() external onlyOwner {
         require(!contributionsOpen && votingOpen, "Round must end after voting period");
         require(block.timestamp > votingStartTime + settings.VotingDuration(), "Round cannot end until end of voting time");
+        contentContract.approvePRs();
         votingOpen = false;
     }
 
