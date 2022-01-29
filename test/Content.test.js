@@ -12,29 +12,32 @@ describe("Content Contract constructor & setup", function () {
         pR3 = accounts[4]; 
         pR4 = accounts[5]; 
         noncreator = accounts[6];
-        SettingsContract = await ethers.getContractFactory("Settings");
-        settingsContract = await SettingsContract.deploy();
-        await settingsContract.deployed(); 
 
         AdminContract = await ethers.getContractFactory("AdminProxy");
-        adminContract = await AdminContract.deploy(settingsContract.address);
+        adminContract = await AdminContract.deploy();
         await adminContract.deployed(); 
 
-        BondingCurve = await ethers.getContractFactory("BondingCurve");
-        bondingCurve = await BondingCurve.deploy();
-        await bondingCurve.deployed();
-
-        PullRequests = await ethers.getContractFactory("PullRequests");
-        prContract = await PullRequests.deploy();
-        await prContract.deployed(); 
-
+        contentAddress = await adminContract.contentAddress();
         ContentContract = await ethers.getContractFactory("Content");
+        contentContract = ContentContract.attach(contentAddress);
+
+        SettingsContract = await ethers.getContractFactory("Settings");
+        settingsAddress = await contentContract.settingsAddress();
+        settingsContract = SettingsContract.attach(settingsAddress);
+
+        bondingCurveAddress = await contentContract.bondingCurveAddress();
+        BondingCurve = await ethers.getContractFactory("BondingCurve");
+        bondingCurveContract = BondingCurve.attach(bondingCurveAddress);
+
+        prAddress = await contentContract.PRsAddress();
+        PullRequests = await ethers.getContractFactory("PullRequests");
+        prContract = PullRequests.attach(prAddress);
     });
 
     it("should assert the owner (admin) of the contract", async function () {
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
-        await contentContract.deployed();
-        expect(await contentContract.owner()).to.equal(owner.address);
+        //contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
+        //await contentContract.deployed();
+        //expect(await contentContract.owner()).to.equal(owner.address);
     });
 
 });
@@ -53,25 +56,30 @@ describe("Content Contract functions", function () {
         pR4 = accounts[6]; 
         noncreator1 = accounts[7];
         noncreator2 = accounts[8];
-        SettingsContract = await ethers.getContractFactory("Settings");
-        settingsContract = await SettingsContract.deploy();
-        await settingsContract.deployed();
 
         AdminContract = await ethers.getContractFactory("AdminProxy");
-        adminContract = await AdminContract.deploy(settingsContract.address);
+        adminContract = await AdminContract.deploy();
         await adminContract.deployed();
 
-        PullRequests = await ethers.getContractFactory("PullRequests");
-        prContract = await PullRequests.deploy();
-        await prContract.deployed();
-
-        BondingCurve = await ethers.getContractFactory("BondingCurve");
-        bondingCurve = await BondingCurve.deploy();
-        await bondingCurve.deployed();
-
+        contentAddress = await adminContract.contentAddress();
         ContentContract = await ethers.getContractFactory("Content");
-        contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
-        await contentContract.deployed();
+        contentContract = ContentContract.attach(contentAddress);
+
+        SettingsContract = await ethers.getContractFactory("Settings");
+        settingsAddress = await contentContract.settingsAddress();
+        settingsContract = SettingsContract.attach(settingsAddress);
+
+        bondingCurveAddress = await contentContract.bondingCurveAddress();
+        BondingCurve = await ethers.getContractFactory("BondingCurve");
+        bondingCurveContract = BondingCurve.attach(bondingCurveAddress);
+
+        prAddress = await contentContract.PRsAddress();
+        PullRequests = await ethers.getContractFactory("PullRequests");
+        prContract = PullRequests.attach(prAddress);
+
+        // 
+        // contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
+        // await contentContract.deployed();
         ownerStake=5* 10**5;
         supply= 10**7;
         initialprice=ethers.BigNumber.from("100000000000000000");

@@ -16,12 +16,14 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     //using BondingCurveLib for BondingCurveLib.BondingCurve;
     //using PRLib for PRLib.PR;
 
-
     AdminProxy immutable adminProxy;
     Settings immutable settings;
     PullRequests immutable PRsContract;
     BondingCurve immutable bondingCurve;
-    address public contentContract;
+    address public contentAddress;
+    address public bondingCurveAddress;
+    address public settingsAddress;
+    address public PRsAddress;
 
     // content mapping
     uint public contentTokenID = 1;
@@ -43,16 +45,17 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     event NewContentMinted(uint tokenID, address creator);
 
     constructor(address _adminAddr,
-                address _settingsAddr,
-                address _PRsAddr,
-                address _bondingCurveAddr
+                address _settingsAddr
                 ) 
-                ERC1155("") {
+                ERC1155("") Ownable() {
         PRsContract = new PullRequests();
+        PRsAddress = address(PRsContract);
         settings = Settings(_settingsAddr);
+        settingsAddress = address(settings);
         adminProxy = AdminProxy(_adminAddr);
-        bondingCurve = BondingCurve(_bondingCurveAddr);
-        contentContract = address(this);
+        bondingCurve = new BondingCurve();
+        bondingCurveAddress = address(bondingCurve);
+        contentAddress = address(this);
     }
 
     modifier onlyAuthor(uint tokenID) {
@@ -60,7 +63,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 "Must have content authorship tokens");
         _;
     }
-
 
     function onERC1155Received(address operator, address from, uint id, uint value, bytes calldata data) 
     external returns (bytes4) {
@@ -127,7 +129,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     function vote(address _PRowner, uint _numVotes, bool positive, uint tokenId) external onlyAuthor(tokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
-        //voteCredits[tokenId][msg.sender] == outstandingFungibleBalance[tokenId][msg.sender] ** 2;
         require((_numVotes <= voteCredits[tokenId][msg.sender]), "Not enough vote credits");
         PRsContract.votePR(_PRowner, _numVotes, positive, tokenId);
         voteCredits[tokenId][msg.sender] -= (_numVotes ** 2); 
@@ -142,18 +143,18 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     // ideally right before calling startContributionPeriod
     // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
     // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
-    function approvePRs(uint tokenID) external onlyOwner {
+    function approvePRs() external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
         uint _id = 1;   // start with the first piece of content
-        while (balanceOf(contentContract, _id) > 0) {   // for each piece of content
+        while (balanceOf(contentAddress, _id) > 0) {   // for each piece of content
             PRsContract.tallyVotes(_id);
             address PRwinner = PRsContract.determineWinner(_id);
             if (PRwinner != address(0)) {
                 _modifyContentandMint(_id, PRwinner);
-                emit PRApproved(tokenID, PRwinner);
+                emit PRApproved(_id, PRwinner);
             } else { // PRs all had 0 or negative votes, so no PR approved
-                emit NoPRApproved(tokenID);
+                emit NoPRApproved(_id);
             }
             PRsContract.clearPRs(_id);
             _id = _id+2;
