@@ -81,7 +81,7 @@ describe("Content Contract functions", function () {
         // contentContract = await ContentContract.deploy(adminContract.address, settingsContract.address, prContract.address, bondingCurve.address);
         // await contentContract.deployed();
         ownerStake=5* 10**5;
-        supply= 10**7;
+        supply= ethers.BigNumber.from("10000000000000000");
         initialprice=ethers.BigNumber.from("100000000000000000");
         encoder = new TextEncoder();
         decoder = new TextDecoder();
@@ -114,7 +114,7 @@ describe("Content Contract functions", function () {
         });
 
         it("should revert if ownerstake greater than supply", async function () {
-            ownerStake = 4 * 10**8;
+            ownerStake = ethers.BigNumber.from("400000000000000000");
             await expect(contentContract.connect(creator).mint(
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
             .to.be.revertedWith("Owner stake must be less than supply");
@@ -153,10 +153,10 @@ describe("Content Contract functions", function () {
         beforeEach(async function () {
             await contentContract.connect(creator).mint(
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
+            tokenID=1;
         });
 
         it("should revert when not in PR window", async function () {
-            tokenID = 1;
             await expect(contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
@@ -202,49 +202,47 @@ describe("Content Contract functions", function () {
             // PRtext1 = "testPR uno";
             // PRtext2 = "testPR numba two";
             // tokenID = 1;
-            await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   // submit PR
-            await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
+            await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH_PR);   // submit PR
+            await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH_PR);
+            contenttokenID=1;
         });
         
         // should revert when not in voting window
         it("should revert when not in voting window", async function () {
             // await adminContract.connect(owner).startContributionPeriod();
-            tokenID = 1;
             await expect(
-                contentContract.connect(creator).vote(pR1.address, 1, true, tokenID)
-            ).to.be.revertedWith("Cannot vote during contribution period");
+                contentContract.connect(creator).vote(pR1.address, 1, true, contenttokenID-1)
+            ).to.be.revertedWith("Voting is currently closed");
         });
 
         // should revert when non-author tries to vote on some content
         it("should revert when non-author tries to vote", async function () {
             await adminContract.connect(owner).startVotingPeriod();
-
             await expect(
-                contentContract.connect(noncreator).vote(PR1, 1, true)
-            ).to.be.revertedWith("Non-authors not allowed to vote on PRs");
+                contentContract.connect(noncreator).vote(pR1.address, 1, true, contenttokenID-1)
+            ).to.be.revertedWith("Must have content authorship tokens");
         });
         
         // should revert when author tries to cast more votes than they have
         it("should revert when author tries to cast more votes than they have available", async function () {
-            await adminContract.connect(owner).startContributionPeriod();
-
+            function delay(ms) {
+                return new Promise( resolve => setTimeout(resolve, ms) );
+            }
+            await delay(1000);
             await adminContract.connect(owner).startVotingPeriod();
-            await contentContract.connect(creator).vote(PR1, 1);
-            await contentContract.connect(owner).approvePR(PR1); 
-            await adminContract.connect(owner).startContributionPeriod();
-            let PR2 = await contentContract.connect(pR1).submitPR("I am PR1");
-            await adminContract.connect(owner).startVotingPeriod();
-            await expect(
-                contentContract.connect(creator).vote(PR2, 50)
-            ).to.be.revertedWith("Not allowed to cast more votes than those available");
-        });
+            await contentContract.connect(creator).vote(pR1.address, 1, true, contenttokenID-1);
 
-        it("should revert when not in voting window", async function () {
-            // await adminContract.connect(owner).startContributionPeriod();
-            tokenID = 1;
+            await delay(1000);
+            await adminContract.connect(owner).endRound(); 
+            await adminContract.connect(owner).startContributionPeriod();
+            let PR2 = await contentContract.connect(pR1).submitPR(prData1, contenttokenID, overridesWithETH_PR);
+
+            await delay(1000);
+            await adminContract.connect(owner).startVotingPeriod();
+            votes = 5* 10**12;
             await expect(
-                contentContract.connect(creator).vote("", 1, true)
-            ).to.be.revertedWith("Cannot vote during contribution period");
+                contentContract.connect(creator).vote(pR1.address, votes, true, contenttokenID-1)
+            ).to.be.revertedWith("Not enough vote credits");
         });
         
     });
@@ -263,20 +261,20 @@ describe("Content Contract functions", function () {
                 return new Promise( resolve => setTimeout(resolve, ms) );
             }
             await delay(1000);
-
-            await adminContract.connect(owner).startVotingPeriod();
-        });
-
-        it("should revert if not owner approving PR", async function () {
+            await expect(adminContract.connect(owner).startVotingPeriod()).to.emit(contentContract, "VoteCreditsAssigned").withArgs();
+            //await expect(contentContract.voteCredits(tokenID, creator.address)).to.be.eq(ethers.BigNumber.from(ownerStake**2));
             tokenID = 0;
-            console.log("creator balance token 0: ",await contentContract.balanceOf(creator.address, 0));
-            console.log("creator vote credits", await contentContract.voteCredits(tokenID, creator.address));
+            //console.log("creator balance token 0: ",await contentContract.balanceOf(creator.address, tokenID));
+            //console.log("creator vote credits", await contentContract.voteCredits(tokenID, creator.address));
             await contentContract.connect(creator).vote(pR1.address, 1, true, tokenID);
             await delay(1000);
-            await adminContract.connect(owner).endRound();
-            await expect(adminContract.votingOpen()).to.be.eq(false);
-            await expect(adminContract.contributionsOpen()).to.be.eq(false);
 
+        });
+
+        it("should approve PR", async function () {
+            await adminContract.connect(owner).endRound();
+            expect(await adminContract.votingOpen()).to.be.eq(false);
+            expect(await adminContract.contributionsOpen()).to.be.eq(false);
         });
     });
 

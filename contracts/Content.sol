@@ -40,6 +40,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
     event NewContentMinted(uint tokenID, address creator);
+    event VoteCreditsAssigned();
 
     constructor(address _adminAddr,
                 address _settingsAddr
@@ -101,6 +102,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     function _mintOwnership(address to, uint id, uint amount, bytes memory data) internal {
         require(id % 2 == 0, "TokenID must be ownership token");
         super._mint(to, id, amount, data);
+        contentAuthors[id].push(to); // add author to list of authors
     }
 
     function submitPR(bytes memory _PRtext, uint _contentTokenID) external payable {
@@ -114,7 +116,6 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    // TODO function for admin to assign vote credits at start of voting; Otherwise there is a bug 
     function _assignVoteCredits() external onlyOwner {
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
@@ -122,12 +123,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
                 voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
             }
         }
+        emit VoteCreditsAssigned();
     }
 
     function vote(address _PRowner, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
-        PRsContract.votePR(_PRowner, _numVotes, positive, ownertokenId);
+        PRsContract.votePR(_PRowner, _numVotes, positive, ownertokenId+1);
         voteCredits[ownertokenId][msg.sender] -= (_numVotes ** 2); 
         emit Voted(msg.sender, _PRowner, _numVotes, positive, ownertokenId+1);
     }

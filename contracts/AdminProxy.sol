@@ -55,8 +55,8 @@ contract AdminProxy is Ownable {
     function endRound() external onlyOwner {
         require(!contributionsOpen && votingOpen, "Round must end after voting period");
         require(block.timestamp > votingStartTime + settings.VotingDuration(), "Round cannot end until end of voting time");
-        contentContract.approvePRs();
         votingOpen = false;
+        contentContract.approvePRs();
     }
 
 }
