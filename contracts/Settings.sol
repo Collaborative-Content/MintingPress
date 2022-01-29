@@ -27,8 +27,8 @@ contract Settings is Ownable {
     constructor() Ownable() {
         // TODO confirm the initial numbers for these vars
         ReserveTokenSpaces = 2;
-        VotingDuration = 5; // 5 sec for tests // 2 * 86400; // two days
-        ContributionDuration = 5; // 5 sec for tests // 5 * 86400; // five days
+        VotingDuration = 1; // 1 sec for tests // 2 * 86400; // two days
+        ContributionDuration = 1; // 1 sec for tests // 5 * 86400; // five days
         MinimumPRPrice = 0.01 * 10 ** 18; //0.01 ETH, in wei
         MinimumInitialPrice = 0.1 * 10 ** 18; //0.1 ETH, in wei
         MinimumInitialSupply = 10 ** 7;

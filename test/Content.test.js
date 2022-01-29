@@ -262,19 +262,20 @@ describe("Content Contract functions", function () {
             function delay(ms) {
                 return new Promise( resolve => setTimeout(resolve, ms) );
             }
-            await delay(5000);
+            await delay(1000);
 
             await adminContract.connect(owner).startVotingPeriod();
         });
 
         it("should revert if not owner approving PR", async function () {
             tokenID = 0;
+            console.log("creator balance token 0: ",await contentContract.balanceOf(creator.address, 0));
+            console.log("creator vote credits", await contentContract.voteCredits(tokenID, creator.address));
             await contentContract.connect(creator).vote(pR1.address, 1, true, tokenID);
-            await delay(5000);
+            await delay(1000);
             await adminContract.connect(owner).endRound();
             await expect(adminContract.votingOpen()).to.be.eq(false);
             await expect(adminContract.contributionsOpen()).to.be.eq(false);
-
 
         });
     });

@@ -32,11 +32,8 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     mapping(uint => address[]) public contentAuthors;
     mapping(uint => mapping(address => uint)) public voteCredits;
 
-    // TODO can we remove outstandingFungibleBalance and replace with balanceof() from ERC1155?
-    mapping( uint => mapping( address => uint )) outstandingFungibleBalance; 
-
     // TODO implement completion vote
-    mapping(uint => mapping(address => bool)) votesToComplete;
+    //mapping(uint => mapping(address => bool)) votesToComplete;
 
     event NewPR(address PRowner, uint tokenID, uint PRPrice);
     event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
@@ -122,7 +119,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
-                voteCredits[tokenId][author] = outstandingFungibleBalance[tokenId][author] ** 2;
+                voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
             }
         }
     }
@@ -135,9 +132,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit Voted(msg.sender, _PRowner, _numVotes, positive, ownertokenId+1);
     }
 
-    function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {
+    // function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {
 
-    }
+    // }
 
     // TODO approvePR should be called by the ContentFactory on all contracts at the same time
     // ideally right before calling startContributionPeriod
