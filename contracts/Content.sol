@@ -83,7 +83,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
     
     // @params data - story, symbol - fungible token 
-    function mint(bytes memory data, uint totalSupply, uint minPRPrice, uint ownerStake, bytes memory tokenSymbol) external payable {
+    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {
         // PUT IN BONDING CURVE METHOD
         // TODO other checks on bonding curve based on additional settings
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -91,8 +91,8 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(totalSupply >= settings.MinimumInitialSupply(), "Total Supply too low");
         require(ownerStake <= totalSupply, "Owner stake must be less than supply");
         
-        bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice);
-        super._mint(contentAddress, contentTokenID, 1, data); // non fungible
+        bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice); // token ID is fungible token
+        super._mint(contentContract, contentTokenID, 1, data); // non fungible
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
                        bondingCurve.getOwnerStake(contentTokenID-1), 
@@ -106,14 +106,15 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         super._mint(to, id, amount, data);
     }
 
-    function submitPR(string memory _PRtext, uint tokenID) external payable {
+    function submitPR(string memory _PRtext, uint _contentTokenID) external payable {
         require(adminProxy.contributionsOpen(), "Contributions are currently closed");
-        require(msg.value >= bondingCurve.getMinPRPrice(tokenID), "ETH Value is below minimum PR price");
-        require(!PRsContract.getPRexists(msg.sender, tokenID), "Address has already submitted a PR for this content within this contribution period");
+        require(_contentTokenID < contentTokenID, "Content doesn't exist");
+        require(msg.value >= bondingCurve.getMinPRPrice(_contentTokenID-1), "ETH Value is below minimum PR price");
+        require(!PRsContract.getPRexists(msg.sender, _contentTokenID), "Address has already submitted a PR for this content within this contribution period");
         // What happens if reverts inside below call? 
-        PRsContract.submitPR(_PRtext, tokenID, msg.sender, msg.value);
-        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, tokenID), msg.sender, tokenID);
-        emit NewPR(msg.sender, tokenID, msg.value, amount);
+        PRsContract.submitPR(_PRtext, _contentTokenID, msg.sender, msg.value);
+        uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, _contentTokenID), msg.sender, _contentTokenID-1);
+        emit NewPR(msg.sender, _contentTokenID, msg.value, amount);
     }
 
     // TODO function for admin to assign vote credits at start of voting; Otherwise there is a bug 

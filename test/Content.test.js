@@ -107,8 +107,8 @@ describe("Content Contract functions", function () {
 
             // first token to be minted will be 0 
             ownerToken = 0;
-            await expect(contentContract.connect(creator).mint(tempData, supply, 
-            initialprice, ownerStake, tokensymbol, overridesWithETH))
+            await expect(contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
             .to.emit(contentContract, "NewContentMinted").withArgs(ownerToken, creator.address);
             expect(await contentContract.balanceOf(creator.address, ownerToken)).to.equal(ownerStake);
             expect(await contentContract.contentData(ownerToken+1)).to.equal(tempData);
@@ -116,8 +116,8 @@ describe("Content Contract functions", function () {
 
         it("should revert if ownerstake greater than supply", async function () {
             ownerStake = 4 * 10**8;
-            await expect(contentContract.connect(creator).mint(tempData, 
-            supply, initialprice, ownerStake, tokensymbol, overridesWithETH))
+            await expect(contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
             .to.be.revertedWith("Owner stake must be less than supply");
 
             //require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -128,8 +128,8 @@ describe("Content Contract functions", function () {
 
         it("should revert if PR price,initial price, or supply is too low", async function () {
             initialprice = 1000;
-            await expect(contentContract.connect(creator).mint(tempData, supply, 
-            initialprice, ownerStake, tokensymbol, overridesWithETH))
+            await expect(contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
             .to.be.revertedWith("Min PR Price is too low");
             // token supply is too low?
             // initial price is too low?
@@ -140,7 +140,8 @@ describe("Content Contract functions", function () {
         // });
 
         it("should assert that tokenID assigned to contract equals 1", async function () {
-            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
+            await contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
             expect(await contentContract.balanceOf(contentContract.address, 1)).to.equal(1);
         });
     
@@ -151,35 +152,39 @@ describe("Content Contract functions", function () {
     describe("PR submitted", function () {
 
         beforeEach(async function () {
-            await contentContract.connect(creator)
-                .mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
+            await contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
+            overridesWithETH_PR = {
+                value: ethers.utils.parseEther("0.5")
+            };
         });
 
         it("should revert when not in PR window", async function () {
             let PRtext = "testPR";
             let tokenID = 1;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
                 ).to.be.revertedWith("Contributions are currently closed");
             // PR block timestamp within PR window 
         });
 
         it("should revert when submitting PR for nonexistent content", async function () {
-            PRtext = "testPR";
+            await adminContract.connect(owner).startContributionPeriod();
+            PRtext = "testPR nonexistent";
             tokenID = 3;
-            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID)
-                ).to.be.revertedWith("Contributions are currently closed");
+            expect(await contentContract.connect(pR1).submitPR(PRtext, tokenID, overridesWithETH)
+                ).to.be.revertedWith("Content doesn't exist");
         });
         
         it("should update PRs when in PR window, for two people", async function () {           
             expect(await adminContract.connect(owner).startContributionPeriod()
                 ).to.emit(adminContract, "ContributionsOpen").withArgs();
-            let PRtext1 = "testPR uno";
-            let PRtext2 = "testPR numba two";
-            let tokenID = 1;
-            console.log(overridesWithETH);
+            PRtext1 = "testPR uno";
+            PRtext2 = "testPR numba two";
+            tokenID = 1;
+            // console.log(overridesWithETH_PR);
             await contentContract.connect(pR1).submitPR(PRtext1, tokenID, overridesWithETH);   // submit PR
-            console.log("DONEZO1");
-            await contentContract.connect(pR2).submitPR(PRtext2, tokenID);
+            console.log("reached");
+            await contentContract.connect(pR2).submitPR(PRtext2, tokenID, overridesWithETH);
             console.log("DONEZO1");
             expect(await prContract.PRs()[tokenID][pR1].content()).to.equal(PRtext1);    // check PR text is persisted
             console.log("DONEZO1");
@@ -200,7 +205,8 @@ describe("Content Contract functions", function () {
     describe("voting", function() {
 
         beforeEach(async function () {
-            await contentContract.connect(creator).mint(tempData, supply, initialprice, ownerStake, tokensymbol, overridesWithETH);
+            await contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
             await adminContract.connect(owner).startContributionPeriod();
             
             PRtext1 = "testPR uno";

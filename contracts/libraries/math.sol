@@ -24,6 +24,4 @@ library mathUtils{
     return x*x == number ? x : x+1;
   }
 
-
-
 }
