@@ -11,7 +11,7 @@ export default function StoryCard({ story}) {
         <Card.Text>
           {story.story}
         </Card.Text>
-        <Button variant="primary">Make a Pull Request</Button>
+        <Button variant="primary">View Story</Button>
       </Card.Body>
     </Card>
     </>
