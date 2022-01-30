@@ -6,13 +6,12 @@ export default function StoryCard({ story}) {
   return (
     <>
       <Card>
-      <Card.Header>Featured</Card.Header>
       <Card.Body>
-        <Card.Title>Special title treatment</Card.Title>
+        <Card.Title>Token Symbol Here</Card.Title>
         <Card.Text>
-          With supporting text below as a natural lead-in to additional content.
+          {story.story}
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Button variant="primary">Make a Pull Request</Button>
       </Card.Body>
     </Card>
     </>
