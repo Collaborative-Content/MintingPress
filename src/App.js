@@ -6,6 +6,7 @@ import List from './pages/List'
 import PR from './pages/PR'
 import Vote from './pages/Vote'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import { requestAccount } from './utils/common';
 
 
 function App() {
@@ -25,6 +26,8 @@ function App() {
           </Route>
         </Routes>
       </div>
+      {/* for sample contract */}
+      {/* <button onClick={requestAccount}>write some text between</button> */}
     </Router>
   )
 }

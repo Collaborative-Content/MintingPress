@@ -19,6 +19,6 @@ function mint(tokensymbol, supply, ownerStake, initialprice, story, value) {
     overridesWithETH = {
         value: value
     };
-    await expect(contract.connect(account).mint(
-        tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
+    await contract.connect(account).mint(
+        tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH)
 }
