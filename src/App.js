@@ -23,6 +23,8 @@ function App() {
           </Route>
           <Route path="/vote" element={<Vote />}>
           </Route>
+          <Route path="/submitPR" element={<PR />}>
+          </Route>
         </Routes>
       </div>
     </Router>

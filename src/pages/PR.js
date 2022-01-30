@@ -10,19 +10,18 @@ export default function PR({story}) {
   function handleSubmitPR() {
     const price = prRef.current.value;
     //sign and send the PR and handle any exceptions
+    console.log(price);
   }
   
   return (
     <>
-      <Navigate>
-      </Navigate>
       <Container>
         <StoryBox story={story}>
         </StoryBox>
+        <label>Price for PR</label>
+        <input type="text" ref={prRef}/>
+        <button onClick={handleSubmitPR}>Submit Pull Request</button>
       </Container>
-      <label>Price for PR</label>
-      <input type="text" ref={prRef}/>
-      <button onClick={handleSubmitPR}>Sumbit Pull Request</button>
     </>
   );
 }
