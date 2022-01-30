@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import { Container } from 'react-bootstrap';
-import Navigate from '../components/NavBar';
-import StoryBox from '../components/StoryBox';
+import React, { useState } from "react";
+import { Container } from "react-bootstrap";
+import Navigate from "../components/NavBar";
+import StoryBox from "../components/StoryBox";
+import { toast } from "react-toastify";
 
-export default function Vote( { story } ) {
-
+export default function Vote({ story }) {
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
 
   function voteCreditsAvailable() {
     //need to implement this!
-    return 10
+    return 10;
   }
 
   function handleVote() {
@@ -20,6 +20,7 @@ export default function Vote( { story } ) {
     const deny = denyRef.current.value;
 
     console.log(voteCredits, approve, deny);
+    toast("Your vote has been submitted!!");
   }
 
   return (
@@ -29,12 +30,24 @@ export default function Vote( { story } ) {
         <label>Vote Credits Available: 100</label>
         <div>
           <label>Vote Credits to be used:</label>
-          <input type="text" ref={voteRef} ></input>
-          <label>Approve: </label>
-          <input type="checkbox" ref={approveRef}></input>
-          <label>Deny: </label>
-          <input type="checkbox" ref={denyRef}></input>
-          <button onClick={handleVote}>Submit</button>
+          <input type="text" className="form-control" ref={voteRef}></input>
+          <br />
+          <div>
+            <input type="radio" ref={approveRef}></input> &nbsp;
+            <label>Approve </label> &nbsp;
+            <input type="radio" ref={denyRef}></input>&nbsp;
+            <label>Deny </label>
+          </div>
+          <br />
+          <div>
+            <button
+              onClick={handleVote}
+              className="btn btn-primary"
+              onClick={handleVote}
+            >
+              Submit Your Vote!
+            </button>
+          </div>
         </div>
       </Container>
     </>
