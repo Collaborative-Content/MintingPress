@@ -4,6 +4,7 @@ import StoryBox from '../components/StoryBox'
 import { Container, Button, Form, Col, Row, FloatingLabel } from 'react-bootstrap';
 import React, { useState, useRef, useEffect } from 'react';
 import {v4} from 'uuid';
+import { mint } from '../utils/Contracts';
 
 const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 
@@ -80,7 +81,7 @@ export default function Mint() {
 
   </Row>
 
-      <Button variant="primary" type="submit" onClick={Mint}>
+      <Button variant="primary" type="submit" onClick={mint}>
     Mint!
     </Button>
     </Container>
