@@ -7,6 +7,7 @@ import PR from './pages/PR'
 import Vote from './pages/Vote'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { requestAccount } from './utils/common';
+import { getFirstContent } from './utils/Contracts';
 
 
 function App() {
@@ -26,8 +27,8 @@ function App() {
           </Route>
         </Routes>
       </div>
-      {/* for sample contract */}
-      {/* <button onClick={requestAccount}>write some text between</button> */}
+      {/* for seeing all stories */}
+      <button onClick={getFirstContent}>see all stories</button>
     </Router>
   )
 }

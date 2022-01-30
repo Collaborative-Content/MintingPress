@@ -76,9 +76,9 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         bytes calldata data
     ) external returns (bytes4) {}
 
-    // function append(string calldata a, string calldata b, string calldata c) internal pure returns (string memory) {
-    //     return string(abi.encodePacked(a, b, c));
-    // }
+    function getContent(uint _tokenId) external view returns (bytes memory) {
+        return contentData[_tokenId];
+    }
     
     // @params data - story, symbol - fungible token 
     function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {

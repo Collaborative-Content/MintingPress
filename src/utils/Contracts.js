@@ -27,15 +27,34 @@ function getPullRequestsContract() {
 }
 
 function mint(tokensymbol, supply, ownerStake, initialprice, story, value) {
-    const encoder = new TextEncoder();
-    const tempData = encoder.encode(story);
+    console.log("Minting Story", { tokensymbol, supply, ownerStake, initialprice, story, value });
     const contract = getContentContract();
-    const account = requestAccount();
-    const overridesWithETH = {
-        value: value
-    };
-    contract.connect(account).mint(
-        tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH)
+    console.log(contract);
+
+    const response = contract.mint(
+        tokensymbol, supply, ownerStake, initialprice, story
+    );
+    console.log(response);
+
+    // const encoder = new TextEncoder();
+    // const tempData = encoder.encode(story);
+    
+    // const account = requestAccount();
+    // const overridesWithETH = {
+    //     value: value
+    // };
+    // contract.connect(account).mint(
+    //     tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH)
 }
 
-export { getAdminContract, getSettingsContract, getContentContract, getBondingCurveContract, getPullRequestsContract, mint }
+function getFirstContent() {
+    console.log("Getting first piece of content");
+    const contract = getContentContract();
+    console.log(contract);
+
+    let firstContent = contract.getContent(1);
+    console.log("First piece of content: ", firstContent);
+    return firstContent;
+}
+
+export { getAdminContract, getSettingsContract, getContentContract, getBondingCurveContract, getPullRequestsContract, mint, getFirstContent }
