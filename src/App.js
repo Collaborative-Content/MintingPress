@@ -7,6 +7,8 @@ import Vote from "./pages/Vote";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import { requestAccount } from './utils/common';
+import { getFirstContent } from './utils/Contracts';
 
 function App() {
   return (

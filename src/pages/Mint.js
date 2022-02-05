@@ -3,7 +3,62 @@ import StoryBox from "../components/StoryBox";
 import { Container, Button, Row, Form, Col } from "react-bootstrap";
 import { toast } from "react-toastify";
 
-import React from "react";
+import 'bootstrap/dist/css/bootstrap.min.css'
+import StoryBox from '../components/StoryBox'
+import { Container, Button, Form, Col, Row, FloatingLabel } from 'react-bootstrap';
+import React, { useState, useRef, useEffect } from 'react';
+import {v4} from 'uuid';
+import { mint } from '../utils/Contracts';
+
+const LOCAL_STORAGE_KEY = 'storiesApp.stories'
+
+// TODO how do we get the storyRef here, and move handleAddStory here
+export default function Mint() {
+
+  const [stories, setStories] = useState([{id: 1, story: "My Story"}])
+  const storyRef = useRef()
+
+  const [story, setStory] = useState('this is the story')
+
+  useEffect(() => {
+    const storedStories = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+    if (storedStories) setStories(storedStories)
+  }, [])
+
+  // need this to persist across page reload inside local browser
+  // first param is function that will run, second param is the trigger.
+  // in this case any time array of todos changes, the effect is run.
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
+  }, [stories])
+
+  // e for event
+  function handleAddStory(e) {
+    setStory(e.target.value);
+  }
+
+  function Mint() {
+    console.log(story)
+  }
+
+  return (
+      <>
+      <Container> 
+      <FloatingLabel controlId="floatingTextarea2" label="Story">
+        <Form.Control
+          as="textarea"
+          placeholder="Leave a comment here"
+          style={{ height: '600px' }}
+          ref={storyRef}
+          value={story}
+          onChange={handleAddStory}
+        />
+      </FloatingLabel>
+      </Container>
+      <Container> 
+      
+{/* from rahul's react branch */}
+{/* import React from "react";
 // TODO how do we get the storyRef here, and move handleAddStory here
 export default function Mint() {
   const mint = () => {
@@ -24,7 +79,8 @@ export default function Mint() {
 
         <StoryBox story={""} />
       </Container>
-      <Container> 
+      <Container>  */}
+
       <Row className="mb-3">
     <Form.Group as={Col} controlId="formGridTokenSymbol">
       <Form.Label>Token Symbol</Form.Label>
