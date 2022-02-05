@@ -1,3 +1,7 @@
+import "bootstrap/dist/css/bootstrap.min.css";
+import StoryBox from "../components/StoryBox";
+import { Container, Button, Row, Form, Col } from "react-bootstrap";
+import { toast } from "react-toastify";
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import StoryBox from '../components/StoryBox'
@@ -53,6 +57,30 @@ export default function Mint() {
       </Container>
       <Container> 
       
+{/* from rahul's react branch */}
+{/* import React from "react";
+// TODO how do we get the storyRef here, and move handleAddStory here
+export default function Mint() {
+  const mint = () => {
+    setTimeout(() => {
+      toast("Your story has been minted!");
+    }, 1000);
+  };
+
+  return (
+    <>
+      <Container>
+        <div className="text-center">
+          <img
+            style={{ height: "200px", margin: "20px auto", width: "200px" }}
+            src="https://cdn.discordapp.com/attachments/931173500289437817/937359950659858512/pp2.png"
+          />
+        </div>
+
+        <StoryBox story={""} />
+      </Container>
+      <Container>  */}
+
       <Row className="mb-3">
     <Form.Group as={Col} controlId="formGridTokenSymbol">
       <Form.Label>Token Symbol</Form.Label>
@@ -80,11 +108,17 @@ export default function Mint() {
     </Form.Group>
 
   </Row>
-
-      <Button variant="primary" type="submit" onClick={mint}>
-    Mint!
-    </Button>
-    </Container>
+  </Container>
+      <Container>
+        <Button
+          variant="primary"
+          type="submit"
+          className="btn-block"
+          onClick={mint}
+        >
+          Mint Your Story!
+        </Button>
+      </Container>
     </>
   );
 }
