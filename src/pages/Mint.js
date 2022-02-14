@@ -1,21 +1,17 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import StoryBox from "../components/StoryBox";
-import { Container, Button, Row, Form, Col } from "react-bootstrap";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { toast } from "react-toastify";
-
-import 'bootstrap/dist/css/bootstrap.min.css'
-import StoryBox from '../components/StoryBox'
 import { Container, Button, Form, Col, Row, FloatingLabel } from 'react-bootstrap';
 import React, { useState, useRef, useEffect } from 'react';
 import {v4} from 'uuid';
 import { mint } from '../utils/Contracts';
+import StoryBox from "../components/StoryBox";
 
 const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 
 // TODO how do we get the storyRef here, and move handleAddStory here
-export default function Mint() {
+export default function Mint({storiesState}) {
 
-  const [stories, setStories] = useState([{id: 1, story: "My Story"}])
+  const [stories, setStories] = storiesState // state passed in
   const storyRef = useRef()
 
   const [story, setStory] = useState('this is the story')
