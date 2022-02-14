@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getVoteCredits } from "../utils/Contracts";
 import { Container } from "react-bootstrap";
 import Navigate from "../components/NavBar";
 import StoryBox from "../components/StoryBox";
@@ -8,10 +9,15 @@ export default function Vote({ story }) {
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
+  const [voteCredit, setVoteCredit] = useState(10);
 
+  useEffect(() => {
+    console.log('initialized');
+    voteCreditsAvailable();
+  }, []);
+  
   function voteCreditsAvailable() {
-    //need to implement this!
-    return 10;
+    setVoteCredit(getVoteCredits(0, ))
   }
 
   function handleVote() {
@@ -27,7 +33,7 @@ export default function Vote({ story }) {
     <>
       <Container>
         <StoryBox story={story} />
-        <label>Vote Credits Available: 100</label>
+        <label>Vote Credits Available: {voteCredit}</label>
         <div>
           <label>Vote Credits to be used:</label>
           <input type="text" className="form-control" ref={voteRef}></input>

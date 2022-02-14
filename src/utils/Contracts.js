@@ -11,14 +11,22 @@ function getAdminContract() {
     return getContract(ADMIN_ADDR, AdminArtifact);
 }
 
-function mint(tokensymbol, supply, ownerStake, initialprice, story, value) {
-    encoder = new TextEncoder();
-    tempData = encoder.encode(story);
-    contract = getContentContract();
-    account = requestAccount();
-    overridesWithETH = {
-        value: value
-    };
-    await expect(contract.connect(account).mint(
-        tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
+// function mint(tokensymbol, supply, ownerStake, initialprice, story, value) {
+//     encoder = new TextEncoder();
+//     tempData = encoder.encode(story);
+//     contract = getContentContract();
+//     account = requestAccount();
+//     overridesWithETH = {
+//         value: value
+//     };
+//     await expect(contract.connect(account).mint(
+//         tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH))
+// }
+
+async function getVoteCredits(tokenID, address)  {
+    const contract = getContentContract();
+    let credits = await contract.voteCredits(tokenID, address);
+    return credits;
 }
+
+export { getVoteCredits }
