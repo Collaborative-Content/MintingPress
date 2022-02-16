@@ -1,11 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import StoryBox from "../components/StoryBox";
-import { Container, Button, Row, Form, Col } from "react-bootstrap";
+import { Container, Button, Row, Form, Col, FloatingLabel } from "react-bootstrap";
 import { toast } from "react-toastify";
-
-import 'bootstrap/dist/css/bootstrap.min.css'
-import StoryBox from '../components/StoryBox'
-import { Container, Button, Form, Col, Row, FloatingLabel } from 'react-bootstrap';
 import React, { useState, useRef, useEffect } from 'react';
 import {v4} from 'uuid';
 import { mint } from '../utils/Contracts';
