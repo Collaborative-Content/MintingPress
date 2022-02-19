@@ -82,4 +82,18 @@ async function getContentState() {
     return allContent;
 }
 
-export { getAdminContract, getSettingsContract, getContentContract, getBondingCurveContract, getPullRequestsContract, mint, getFirstContent, getContentState}
+async function getVotes(tokenID, address) {
+    const contract = getContentContract();
+    let credits = await contract.voteCredits(tokenID, address);
+    return credits;
+}
+
+export { getAdminContract, 
+         getSettingsContract, 
+         getContentContract, 
+         getBondingCurveContract, 
+         getPullRequestsContract, 
+         mint, 
+         getFirstContent,
+         getVotes,
+         getContentState }
