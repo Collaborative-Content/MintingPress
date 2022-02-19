@@ -1,10 +1,12 @@
 import { ADMIN_ADDR, SETTINGS_ADDR, CONTENT_ADDR, BC_ADDR, PRS_ADDR } from "../constants";
+const { ethers } = require("hardhat");
 import { getContract, requestAccount } from "./common";
-import AdminArtifact from "../abis/AdminProxy.json"
-import SettingsArtifact from "../abis/Settings.json"
-import ContentArtifact from "../abis/Content.json"
-import BCArtifact from "../abis/BondingCurve.json"
-import PRsArtifact from "../abis/PullRequests.json"
+import AdminArtifact from "../abis/AdminProxy.json";
+import SettingsArtifact from "../abis/Settings.json";
+import ContentArtifact from "../abis/Content.json";
+import BCArtifact from "../abis/BondingCurve.json";
+import PRsArtifact from "../abis/PullRequests.json";
+import {v4} from "uuid";
 
 function getAdminContract() {
     return getContract(ADMIN_ADDR, AdminArtifact);
@@ -57,4 +59,27 @@ function getFirstContent() {
     return firstContent;
 }
 
-export { getAdminContract, getSettingsContract, getContentContract, getBondingCurveContract, getPullRequestsContract, mint, getFirstContent }
+async function getContentState() {
+    console.log("Getting content");
+    const contract = getContentContract();
+    console.log(contract);
+
+    accounts = await ethers.getSigners();
+    // need name, story, id
+    let contentTokenId = await contract.connect(accounts[0]).contentTokenId().toString();
+    let allContent = [];
+    for (let i=1; i<contentTokenId; i=i+2) {
+        let newcontent = {
+            "story": await contract.connect(accounts[0]).getContent(i).toString(),
+            "id":   v4(),
+            "name": "STORY"
+        };
+        allContent.push(newcontent)
+    }
+    if (!allContent) {
+        allContent = [{}];
+    }
+    return allContent;
+}
+
+export { getAdminContract, getSettingsContract, getContentContract, getBondingCurveContract, getPullRequestsContract, mint, getFirstContent, getContentState}

@@ -9,12 +9,14 @@ import "react-toastify/dist/ReactToastify.css";
 import {useState} from "react";
 import { ToastContainer } from "react-toastify";
 import { requestAccount } from './utils/common';
-import { getFirstContent } from './utils/Contracts';
+import { getFirstContent, getContentState } from './utils/Contracts';
 import {v4} from 'uuid';
 
 function App() {
 
-  const storiesState = useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
+  const storiesState = useState(getContentState());
+  console.log(storiesState[0]);
+  //useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
 
   return (
     <Router>
