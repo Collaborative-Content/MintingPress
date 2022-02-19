@@ -5,6 +5,7 @@
 /src/abis
 /.pnp
 .pnp.js
+/src/abis
 
 # testing
 /coverage
