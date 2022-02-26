@@ -12,6 +12,12 @@ const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 export default function Mint() {
 
   const [stories, setStories] = useState([{id: 1, story: "My Story"}])
+  const [tokenSymbol, setTokenSymbol] = useState();
+  const [tokenSupply, setTokenSupply] = useState();
+  const [ownerStake, setOwnerStake] = useState();
+  const [prPrice, setPrPrice] = useState();
+  const [mintValue, setMintValue] = useState();
+  
   const storyRef = useRef()
 
   const [story, setStory] = useState('this is the story')
@@ -34,7 +40,7 @@ export default function Mint() {
   }
 
   function Mint() {
-    console.log(story)
+    mint()
   }
 
   return (
@@ -78,6 +84,7 @@ export default function Mint() {
       <Container>  */}
 
       <Row className="mb-3">
+    <Form onSubmit={mint}>
     <Form.Group as={Col} controlId="formGridTokenSymbol">
       <Form.Label>Token Symbol</Form.Label>
       <Form.Control />
@@ -102,6 +109,8 @@ export default function Mint() {
       <Form.Label>ETH Value</Form.Label>
       <Form.Control />
     </Form.Group>
+    </Form>
+    
 
   </Row>
   </Container>
