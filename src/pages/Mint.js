@@ -82,33 +82,33 @@ export default function Mint() {
       </Container>
       <Container>  */}
 
-      <Row className="mb-3">
-    <Form onSubmit={mint}>
-    <Form.Group as={Col} controlId="formGridTokenSymbol">
-      <Form.Label>Token Symbol</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridSupply">
-    <Form.Label>Supply</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridOwnerStake">
-      <Form.Label>Owner Stake</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridMinPRPrice">
-      <Form.Label>Min PR Price</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridETH">
-      <Form.Label>ETH Value</Form.Label>
-      <Form.Control />
-    </Form.Group>
-    </Form>
+    <Row className="mb-3">
+      <Form onSubmit={mint}>
+        <Form.Group as={Col} controlId="formGridTokenSymbol">
+          <Form.Label>Token Symbol</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridSupply">
+        <Form.Label>Supply</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridOwnerStake">
+          <Form.Label>Owner Stake</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridMinPRPrice">
+          <Form.Label>Min PR Price</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridETH">
+          <Form.Label>ETH Value</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      </Form>
     
 
   </Row>
