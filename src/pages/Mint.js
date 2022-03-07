@@ -11,7 +11,12 @@ const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 // TODO how do we get the storyRef here, and move handleAddStory here
 export default function Mint({storiesState}) {
 
-  const [stories, setStories] = storiesState // state passed in
+  const [stories, setStories] = useState([{id: 1, story: "My Story"}])
+  const [tokenSymbol, setTokenSymbol] = useState();
+  const [tokenSupply, setTokenSupply] = useState();
+  const [ownerStake, setOwnerStake] = useState();
+  const [prPrice, setPrPrice] = useState();
+  const [mintValue, setMintValue] = useState();
   const storyRef = useRef()
 
   const [story, setStory] = useState('this is the story')
@@ -34,7 +39,7 @@ export default function Mint({storiesState}) {
   }
 
   function Mint() {
-    console.log(story)
+    mint()
   }
 
   return (
@@ -77,31 +82,34 @@ export default function Mint() {
       </Container>
       <Container>  */}
 
-      <Row className="mb-3">
-    <Form.Group as={Col} controlId="formGridTokenSymbol">
-      <Form.Label>Token Symbol</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridSupply">
-    <Form.Label>Supply</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridOwnerStake">
-      <Form.Label>Owner Stake</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridMinPRPrice">
-      <Form.Label>Min PR Price</Form.Label>
-      <Form.Control />
-    </Form.Group>
-
-    <Form.Group as={Col} controlId="formGridETH">
-      <Form.Label>ETH Value</Form.Label>
-      <Form.Control />
-    </Form.Group>
+    <Row className="mb-3">
+      <Form onSubmit={mint}>
+        <Form.Group as={Col} controlId="formGridTokenSymbol">
+          <Form.Label>Token Symbol</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridSupply">
+        <Form.Label>Supply</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridOwnerStake">
+          <Form.Label>Owner Stake</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridMinPRPrice">
+          <Form.Label>Min PR Price</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      
+        <Form.Group as={Col} controlId="formGridETH">
+          <Form.Label>ETH Value</Form.Label>
+          <Form.Control />
+        </Form.Group>
+      </Form>
+    
 
   </Row>
   </Container>
