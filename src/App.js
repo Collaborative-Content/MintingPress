@@ -14,8 +14,8 @@ import {v4} from 'uuid';
 
 function App() {
 
-  const storiesState = useState(getContentState());
-  console.log(storiesState[0]);
+  //const storiesState = useState(getContentState());
+  //console.log("app start stories state: ", storiesState);
   //useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
 
   return (
@@ -24,7 +24,7 @@ function App() {
         <Navigate />
         <Routes>
           <Route path="/" element={<Mint />}></Route>
-          <Route path="/mint" element={<Mint storiesState={storiesState}/>}></Route>
+          <Route path="/mint" element={<Mint />}></Route>
           <Route path="/view-story/:id" element={<PR id={""} />}></Route>
           <Route path="/list" element={<List stories={storiesState[0]}/>}></Route>
           <Route path="/vote" element={<Vote />}></Route>

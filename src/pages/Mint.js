@@ -9,32 +9,43 @@ import StoryBox from "../components/StoryBox";
 const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 
 // TODO how do we get the storyRef here, and move handleAddStory here
-export default function Mint({storiesState}) {
+export default function Mint() {
 
-  const [stories, setStories] = storiesState // state passed in
   const storyRef = useRef()
 
-  const [story, setStory] = useState('this is the story')
+  const [fields, setFields] = useState({
+    story: "this is the story",
+    supply: "",
+    stake:"",
+    symbol: "",
+    PRprice: "",
+    val: "",
+  })
 
-  useEffect(() => {
-    const storedStories = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
-    if (storedStories) setStories(storedStories)
-  }, [])
+  const handleInputChange = (e) => {
+      setFields({
+          ...fields,
+          [e.target.name]:e.target.value
+      })
+  }
+
+  // useEffect(() => {
+  //   const storedStories = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
+  //   if (storedStories) setStories(storedStories)
+  // }, [])
 
   // need this to persist across page reload inside local browser
   // first param is function that will run, second param is the trigger.
   // in this case any time array of todos changes, the effect is run.
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
-  }, [stories])
+  // useEffect(() => {
+  //   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
+  // }, [stories])
 
-  // e for event
-  function handleAddStory(e) {
-    setStory(e.target.value);
-  }
 
-  function Mint() {
-    console.log(story)
+  function mintStory() {
+    mint(fields.symbol, fields.supply, fields.stake, fields.PRprice, fields.story, fields.val)
+    console.log(fields.story)
+    console.log(fields.symbol)
   }
 
   return (
@@ -45,9 +56,9 @@ export default function Mint({storiesState}) {
           as="textarea"
           placeholder="Leave a comment here"
           style={{ height: '600px' }}
-          ref={storyRef}
-          value={story}
-          onChange={handleAddStory}
+          name="story"
+          value={fields.story}
+          onChange={handleInputChange}
         />
       </FloatingLabel>
       </Container>
@@ -80,27 +91,47 @@ export default function Mint() {
       <Row className="mb-3">
     <Form.Group as={Col} controlId="formGridTokenSymbol">
       <Form.Label>Token Symbol</Form.Label>
-      <Form.Control />
+      <Form.Control
+          name="symbol"
+          value={fields.symbol}
+          onChange={handleInputChange}
+        />
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridSupply">
     <Form.Label>Supply</Form.Label>
-      <Form.Control />
+      <Form.Control 
+          name="supply"
+          value={fields.supply}
+          onChange={handleInputChange}
+        />
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridOwnerStake">
       <Form.Label>Owner Stake</Form.Label>
-      <Form.Control />
+      <Form.Control 
+          name="stake"
+          value={fields.stake}
+          onChange={handleInputChange}
+        />
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridMinPRPrice">
       <Form.Label>Min PR Price</Form.Label>
-      <Form.Control />
+      <Form.Control 
+          name="PRprice"
+          value={fields.PRprice}
+          onChange={handleInputChange}
+        />
     </Form.Group>
 
     <Form.Group as={Col} controlId="formGridETH">
       <Form.Label>ETH Value</Form.Label>
-      <Form.Control />
+      <Form.Control 
+          name="val"
+          value={fields.val}
+          onChange={handleInputChange}
+        />
     </Form.Group>
 
   </Row>
@@ -110,7 +141,7 @@ export default function Mint() {
           variant="primary"
           type="submit"
           className="btn-block"
-          onClick={mint}
+          onClick={mintStory}
         >
           Mint Your Story!
         </Button>
