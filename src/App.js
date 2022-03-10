@@ -14,7 +14,7 @@ import {v4} from 'uuid';
 
 function App() {
 
-  //const storiesState = useState(getContentState());
+  const storiesState = useState(getContentState());
   //console.log("app start stories state: ", storiesState);
   //useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
 
