@@ -1,6 +1,6 @@
 import { ADMIN_ADDR, SETTINGS_ADDR, CONTENT_ADDR, BC_ADDR, PRS_ADDR } from "../constants";
 import { ethers } from 'ethers';
-import { getContract, requestAccount } from "./common";
+import { getContract, getSelectedAddress, requestAccount } from "./common";
 import AdminArtifact from "../abis/AdminProxy.json";
 import SettingsArtifact from "../abis/Settings.json";
 import ContentArtifact from "../abis/Content.json";
@@ -34,17 +34,17 @@ async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
     console.log(contract);
     console.log(contract.address);
 
-    const account = 
-    //await requestAccount();
+    const account = await getSelectedAddress();
     console.log("account to connect: ", account);
     const encoder = new TextEncoder();
     const tempData = encoder.encode(story);
+    const symbolData = encoder.encode(tokensymbol);
     
     const overridesWithETH = {
         value: value
     };
-    let response = await contract.connect(account).mint(
-        tokensymbol, supply, ownerStake, PRprice, tempData, overridesWithETH
+    let response = await contract.mint(
+        symbolData, supply, ownerStake, PRprice, tempData, overridesWithETH
     );
     console.log(response);
 }
