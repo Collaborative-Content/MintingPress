@@ -41,7 +41,6 @@ export default function Mint() {
   //   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
   // }, [stories])
 
-
   function mintStory() {
     mint(fields.symbol, fields.supply, fields.stake, fields.PRprice, fields.story, fields.val)
     console.log(fields.story)

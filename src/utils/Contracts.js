@@ -86,6 +86,7 @@ async function getContentState() {
 async function getVotes(tokenID, address) {
     const contract = getContentContract();
     let credits = await contract.voteCredits(tokenID, address);
+    console.log(credits);
     return credits;
 }
 
