@@ -81,7 +81,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
     
     // @params data - story, symbol - fungible token 
-    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {
+    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable returns (uint) {
         // PUT IN BONDING CURVE METHOD
         // TODO other checks on bonding curve based on additional settings
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -91,12 +91,14 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         
         bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice); // token ID is fungible token
         super._mint(contentAddress, contentTokenID, 1, data); // non fungible
+        uint thisContentTokenID = contentTokenID;
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
                        bondingCurve.getOwnerStake(contentTokenID-1), 
                        bondingCurve.getTokenSymbol(contentTokenID-1));   // fungible
         emit NewContentMinted(contentTokenID-1, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
+        return thisContentTokenID;
     }
 
     function _mintOwnership(address to, uint id, uint amount, bytes memory data) internal {
