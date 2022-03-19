@@ -47,6 +47,7 @@ async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
         symbolData, supply, ownerStake, PRprice, tempData, overridesWithETH
     );
     console.log(response);
+    console.log("Balance of account ", account, ": ", contract.balanceOf(account, 0));
 }
 
 function getFirstContent() {
@@ -59,27 +60,26 @@ function getFirstContent() {
     return firstContent;
 }
 
-async function getContentState() {
+async function getContent() {
     console.log("Getting content");
     const contract = getContentContract();
-    console.log(contract);
+    //console.log(contract);
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    let account = requestAccount();
+    const account = (await getSelectedAddress());
+    console.log("account to connect: ", account);
     // need name, story, id
-    let contentTokenId = await contract.connect(account).contentTokenId().toString();
-    let allContent = [];
+    const contentTokenId = (await contract.contentTokenID()).toNumber();
+    console.log("token id: ", contentTokenId);
+    let allContent = new Array();
     for (let i=1; i<contentTokenId; i=i+2) {
         let newcontent = {
-            "story": await contract.connect(account).getContent(i).toString(),
+            "story": (await contract.getContent(i)).toString(),
             "id":   v4(),
             "name": "STORY"
         };
-        allContent.push(newcontent)
+        allContent.push(newcontent);
     }
-    if (!allContent) {
-        allContent = [{}];
-    }
+    console.log(allContent);
     return allContent;
 }
 
@@ -97,4 +97,4 @@ export { getAdminContract,
          mint, 
          getFirstContent,
          getVotes,
-         getContentState }
+         getContent }
