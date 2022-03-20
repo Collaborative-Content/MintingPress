@@ -3,25 +3,23 @@ import StoryCard from "../components/StoryCard"
 import React from 'react';
 import {getContent } from '../utils/Contracts';
 
-export default function List() {
+export default function List(stories) {
 
-  function getState() {
-    const stories = getContent();
-    return stories;
-  }
+  // const [stories, setStories] = React.useState("");
+  // React.useEffect(() => {
+  //   const fetchStories = async () => {
+  //     const response = await getContent();
+  //     //const { storiesContent } = await response.json();
+  //     setStories(response);
+  //   };
+  //   fetchStories();
+  // }, []);
 
-  // TODO initialize state here
-  // see https://stackoverflow.com/a/40030884 and https://daveceddia.com/where-initialize-state-react/
-
-
-  const stories = getState();
-  stories.then((storyarray) => {
-    console.log("These are stories ", storyarray);
-    return storyarray.map((story) => {
-      return (
-        <StoryCard key={story.id} story={story} />
-      );
-    });
+  console.log("These are stories ", stories);
+  return stories.map((story) => {
+    return (
+      <StoryCard key={story.id} story={story} />
+    );
   });
 
 

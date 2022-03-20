@@ -6,13 +6,23 @@ import PR from "./pages/PR";
 import Vote from "./pages/Vote";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
-import {useState} from "react";
+import React from "react";
 import { ToastContainer } from "react-toastify";
 import { requestAccount } from './utils/common';
 import {v4} from 'uuid';
+import { getContent } from "./utils/Contracts";
 
 function App() {
 
+  const [stories, setStories] = React.useState("");
+  React.useEffect(() => {
+    const fetchStories = async () => {
+      const response = await getContent();
+      //const { storiesContent } = await response.json();
+      setStories(response);
+    };
+    fetchStories();
+  }, []);
   //useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
 
   return (
@@ -23,7 +33,7 @@ function App() {
           <Route path="/" element={<Mint />}></Route>
           <Route path="/mint" element={<Mint />}></Route>
           <Route path="/view-story/:id" element={<PR id={""} />}></Route>
-          <Route path="/list" element={<List />}></Route>
+          <Route path="/list" element={<List stories={stories} />}></Route>
           <Route path="/vote" element={<Vote />}></Route>
           <Route path="/submitPR" element={<PR />}></Route>
         </Routes>
