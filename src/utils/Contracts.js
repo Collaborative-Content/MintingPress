@@ -64,6 +64,7 @@ async function getContent() {
     console.log("Getting content");
     const contract = getContentContract();
     //console.log(contract);
+    const bondingCurve = getBondingCurveContract();
 
     const account = (await getSelectedAddress());
     console.log("account to connect: ", account);
@@ -75,7 +76,7 @@ async function getContent() {
         let newcontent = {
             "story": (await contract.getContent(i)).toString(),
             "id":   v4(),
-            "name": "STORY"
+            "name": (await bondingCurve.getTokenSymbol(i-1)).toString()
         };
         allContent.push(newcontent);
     }
