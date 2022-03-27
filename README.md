@@ -12,3 +12,18 @@ The goals of MintingPress are simple:
 3. Preserve and even augment the creative process
 
 Happy Minting!
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## To get this up and running locally
+
+Clone this repo. From directory `MintingPress`:
+- `npx hardhat compile` to compile the smart contracts
+- `npx hardhat node` to set up a blockchain on localhost network, and create accounts with balances
+- `npx hardhat run --network localhost scripts/deploy.js` to deploy the smart contracts to ^ blockchain
+-  copy paste smart contract addresses from ^ into `src/constants.js`
+-  `npm start` to run the react app
+
+## Additional functionality
+- `npx hardhat console` to open up a CLI with the smart contracts
+- `npx hardhat test` to run the unit test suite in `test/Content.test.js`
