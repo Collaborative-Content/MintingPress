@@ -118,7 +118,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits(bytes memory tokenSymbol) external onlyOwner {
+    function _assignVoteCredits() external onlyOwner {
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
