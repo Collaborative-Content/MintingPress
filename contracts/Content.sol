@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
 import "./libraries/math.sol";
+import "./libraries/ABDKMath64X64.sol";
 import "./PullRequests.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
@@ -81,7 +82,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
     
     // @params data - story, symbol - fungible token 
-    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {
+    function mint(bytes memory tokenSymbol, uint128 totalSupply, uint128 ownerStake, uint128 minPRPrice, bytes memory data) external payable {
         // PUT IN BONDING CURVE METHOD
         // TODO other checks on bonding curve based on additional settings
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -93,15 +94,15 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         super._mint(contentAddress, contentTokenID, 1, data); // non fungible
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
-                       bondingCurve.getOwnerStake(contentTokenID-1), 
+                       ABDKMath64x64.fromUInt(bondingCurve.getOwnerStake(contentTokenID-1)), 
                        bondingCurve.getTokenSymbol(contentTokenID-1));   // fungible
         emit NewContentMinted(contentTokenID-1, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
     }
 
-    function _mintOwnership(address to, uint id, uint amount, bytes memory data) internal {
+    function _mintOwnership(address to, uint id, int128 amount, bytes memory data) internal {
         require(id % 2 == 0, "TokenID must be ownership token");
-        super._mint(to, id, amount, data);
+        super._mint(to, id, uint256(int256(amount)), data);
         contentAuthors[id].push(to); // add author to list of authors
     }
 
@@ -110,7 +111,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(_contentTokenID < contentTokenID, "Content does not exist");
         require(msg.value >= bondingCurve.getMinPRPrice(_contentTokenID-1), "ETH Value is below minimum PR price");
         require(!PRsContract.getPRexists(msg.sender, _contentTokenID), "Address has already submitted a PR for this content within this contribution period");
-        PRsContract.submitPR(_PRtext, _contentTokenID, msg.sender, msg.value);
+        PRsContract.submitPR(_PRtext, _contentTokenID, msg.sender, uint128(msg.value));
         // future feature should add calculating amount that this PR owner would mint if they are approved (based on their PR price)
         //uint amount = bondingCurve.calculatePurchaseReturn(PRsContract.getPrice(msg.sender, _contentTokenID), msg.sender, _contentTokenID-1);
         emit NewPR(msg.sender, _contentTokenID, msg.value);
@@ -162,11 +163,11 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
 
     function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
         bytes memory winningContent = PRsContract.getContent(_PRwinner, _contentTokenId);
-        uint winningPRPrice = PRsContract.getPrice(_PRwinner, _contentTokenId);
+        uint128 winningPRPrice = uint128(PRsContract.getPrice(_PRwinner, _contentTokenId));
         contentData[_contentTokenId] = bytes.concat(contentData[_contentTokenId], " ", winningContent);  // contentData[_contentTokenId] = winningContent;
         uint ownershipTokenId = _contentTokenId -1;
         // existing content + new lines + winning PR
-        uint amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
+        int128 amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
     }
 }

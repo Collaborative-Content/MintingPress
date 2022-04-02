@@ -31,7 +31,7 @@ contract PullRequests is Ownable {
         }
     }
 
-    function submitPR(bytes memory _PRtext, uint tokenID, address caller, uint value) external payable onlyOwner {
+    function submitPR(bytes memory _PRtext, uint tokenID, address caller, uint128 value) external payable onlyOwner {
         // require(!PRexists[tokenID][caller], "Existing PR");
         PRauthors[tokenID].push(caller);
         // tokenID is content token ID

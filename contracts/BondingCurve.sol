@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "./libraries/math.sol";
+import "./libraries/ABDKMath64X64.sol";
 import "./Settings.sol";
 
 contract BondingCurve {
@@ -16,9 +17,9 @@ contract BondingCurve {
     uint ownerStake;
   }
   
-  mapping( uint => uint ) public reserveCounter;
+  mapping( uint => int128 ) public reserveCounter;
   mapping( uint => CurveParams ) public bondingCurveParams;
-  event FungibleTokensEmitted(address owner, uint tokenID, uint amount, bytes tokenSymbol);
+  event FungibleTokensEmitted(address owner, uint tokenID, int128 amount, bytes tokenSymbol);
 
   constructor() {
     settingsContract = new Settings();
@@ -39,7 +40,7 @@ contract BondingCurve {
     temp.minPRPrice = _minPRPrice;
 
     bondingCurveParams[_tokenID] = temp;
-    reserveCounter[_tokenID] += _ownerStake;
+    reserveCounter[_tokenID] += ABDKMath64x64.fromUInt(_ownerStake);
   }
 
   modifier onlyOwnershipTokens(uint tokenID) {
@@ -47,11 +48,13 @@ contract BondingCurve {
     _;
   }
 
-  function calculatePurchaseReturn(uint price, address creator_address, uint _ownershipTokenId) public onlyOwnershipTokens(_ownershipTokenId) returns(uint) {
+  function calculatePurchaseReturn(uint256 price, address creator_address, uint _ownershipTokenId) public onlyOwnershipTokens(_ownershipTokenId) returns(int128) {
     require(price >= bondingCurveParams[_ownershipTokenId].minPRPrice, "Below the minimum value for the pull request");
-    uint returnStake;
-    returnStake = (bondingCurveParams[_ownershipTokenId].totalSupply - bondingCurveParams[_ownershipTokenId].ownerStake)*((mathUtils.ceilSqrt(1 + mathUtils.roundDivision((price * 10000),(bondingCurveParams[_ownershipTokenId].totalSupply-reserveCounter[_ownershipTokenId])))/100) - 1)/10;
-    require(reserveCounter[_ownershipTokenId] + returnStake < bondingCurveParams[_ownershipTokenId].totalSupply, "No more tokens for sale, check back later!");
+    int128 returnStake;
+    int128 y = ABDKMath64x64.sqrt(1 + ABDKMath64x64.div(ABDKMath64x64.fromUInt(price), (ABDKMath64x64.fromUInt(bondingCurveParams[_ownershipTokenId].totalSupply)-reserveCounter[_ownershipTokenId])));
+    int128 x = ABDKMath64x64.fromUInt(bondingCurveParams[_ownershipTokenId].totalSupply) - ABDKMath64x64.fromUInt(bondingCurveParams[_ownershipTokenId].ownerStake);
+    returnStake = ABDKMath64x64.mul(x,y) - 1;
+    require(reserveCounter[_ownershipTokenId] + returnStake < ABDKMath64x64.fromUInt(bondingCurveParams[_ownershipTokenId].totalSupply), "No more tokens for sale, check back later!");
     reserveCounter[_ownershipTokenId] += returnStake;
     emit FungibleTokensEmitted(creator_address, _ownershipTokenId, returnStake, bondingCurveParams[_ownershipTokenId].tokenSymbol);
     return returnStake;
