@@ -1,27 +1,25 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
+import { Container, Card, Button, Nav } from 'react-bootstrap';
 
 export default function StoryCard({ story}) {
 
   return (
     <>
+      <div style={{ marginBottom: "20px" }}>
+      <Container>
       <Card>
-      <Card.Header>Featured</Card.Header>
       <Card.Body>
-        <Card.Title>Special title treatment</Card.Title>
+        <Card.Title>{story.name}</Card.Title>
         <Card.Text>
-          With supporting text below as a natural lead-in to additional content.
+          {story.story}
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Nav.Link href="submitPR">
+          <a className="btn btn-primary">View Story</a>
+        </Nav.Link>
       </Card.Body>
     </Card>
+    </Container>
+    </div>
     </>
-  )
+  );
 }
-
-{/* <div>
-      <label> 
-        <input type="checkbox" checked = {todo.complete} onChange={handleTodoClick}/>
-        {todo.name}
-      </label>
-  </div> */}

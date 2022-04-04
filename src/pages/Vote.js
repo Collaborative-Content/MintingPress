@@ -1,31 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { getVoteCredits } from "../utils/Contracts";
 import { Container } from "react-bootstrap";
 import Navigate from "../components/NavBar";
 import StoryBox from "../components/StoryBox";
+import { getVotes } from "../utils/Contracts";
 import { toast } from "react-toastify";
+import { getSelectedAddress } from "../utils/common";
 
 export default function Vote({ story }) {
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
   const [voteCredit, setVoteCredit] = useState(10);
-
+ 
   useEffect(() => {
-    console.log('initialized');
-    voteCreditsAvailable();
+    let address = getSelectedAddress();
+    voteCreditsAvailable(0, address);
   }, []);
   
-  function voteCreditsAvailable() {
-    setVoteCredit(getVoteCredits(0, ))
+  async function voteCreditsAvailable(tokenID, address) {
+    let credits = await getVotes(tokenID, address);
+    setVoteCredit(parseInt(credits));
   }
 
   function handleVote() {
-    const voteCredits = voteRef.current.value;
+    const voteCreditsUsed = voteRef.current.value;
     const approve = approveRef.current.value;
     const deny = denyRef.current.value;
 
-    console.log(voteCredits, approve, deny);
+    console.log(voteCreditsUsed, approve, deny);
     toast("Your vote has been submitted!!");
   }
 
@@ -49,7 +51,6 @@ export default function Vote({ story }) {
             <button
               onClick={handleVote}
               className="btn btn-primary"
-              onClick={handleVote}
             >
               Submit Your Vote!
             </button>

@@ -76,12 +76,12 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         bytes calldata data
     ) external returns (bytes4) {}
 
-    // function append(string calldata a, string calldata b, string calldata c) internal pure returns (string memory) {
-    //     return string(abi.encodePacked(a, b, c));
-    // }
+    function getContent(uint _tokenId) external view returns (bytes memory) {
+        return contentData[_tokenId];
+    }
     
     // @params data - story, symbol - fungible token 
-    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable {
+    function mint(bytes memory tokenSymbol, uint totalSupply, uint ownerStake, uint minPRPrice, bytes memory data) external payable returns (uint) {
         // PUT IN BONDING CURVE METHOD
         // TODO other checks on bonding curve based on additional settings
         require(minPRPrice >= settings.MinimumPRPrice(), "Min PR Price is too low");
@@ -91,12 +91,14 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         
         bondingCurve.setCurveParams(tokenSymbol, contentTokenID - 1, totalSupply, ownerStake,  minPRPrice); // token ID is fungible token
         super._mint(contentAddress, contentTokenID, 1, data); // non fungible
+        uint thisContentTokenID = contentTokenID;
         _mintOwnership(msg.sender, 
                        contentTokenID-1, 
                        bondingCurve.getOwnerStake(contentTokenID-1), 
                        bondingCurve.getTokenSymbol(contentTokenID-1));   // fungible
         emit NewContentMinted(contentTokenID-1, msg.sender);
         contentTokenID += settings.ReserveTokenSpaces();  // increment to make space for new content
+        return thisContentTokenID;
     }
 
     function _mintOwnership(address to, uint id, uint amount, bytes memory data) internal {
@@ -116,7 +118,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits(bytes memory tokenSymbol) external onlyOwner {
+    function _assignVoteCredits() external onlyOwner {
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];

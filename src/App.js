@@ -6,9 +6,25 @@ import PR from "./pages/PR";
 import Vote from "./pages/Vote";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
+import React from "react";
 import { ToastContainer } from "react-toastify";
+import { requestAccount } from './utils/common';
+import {v4} from 'uuid';
+import { getContent } from "./utils/Contracts";
 
 function App() {
+
+  // const [stories, setStories] = React.useState("");
+  // React.useEffect(() => {
+  //   const fetchStories = async () => {
+  //     const response = await getContent();
+  //     //const { storiesContent } = await response.json();
+  //     setStories(response);
+  //   };
+  //   fetchStories();
+  // }, []);
+  //useState([{id: v4(), story: () => getFirstContent(), name: "$STORY"}, {id: v4(), story: () => getFirstContent(), name: "$STORY2"}])
+
   return (
     <Router>
       <div>

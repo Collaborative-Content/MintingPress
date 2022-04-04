@@ -11,6 +11,8 @@ contract AdminProxy is Ownable {
     bool public votingOpen;
     Content public contentContract;
     address public immutable contentAddress;
+    Settings public settings;
+    address public immutable settingsAddress;
 
     uint lastPeriod;
     uint votingStartTime;
@@ -18,11 +20,10 @@ contract AdminProxy is Ownable {
 
     event ContributionsOpen();
     event VotingOpen();
-    
-    Settings private settings;
 
     constructor() {
         settings = new Settings();
+        settingsAddress = address(settings);
         contentContract = new Content(address(this), address(settings));
         contentAddress = address(contentContract);
     }
