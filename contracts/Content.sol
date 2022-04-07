@@ -11,6 +11,8 @@ import "./PullRequests.sol";
 import "./Settings.sol";
 import "./AdminProxy.sol";
 import "./BondingCurve.sol";
+import "hardhat/console.sol";
+
 
 
 contract Content is ERC1155, Ownable, IERC1155Receiver{
@@ -101,6 +103,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
 
     function _mintOwnership(address to, uint id, int128 amount, bytes memory data) internal {
+        console.logInt(0);
         require(id % 2 == 0, "TokenID must be ownership token");
         super._mint(to, id, uint256(int256(amount)), data);
         contentAuthors[id].push(to); // add author to list of authors
