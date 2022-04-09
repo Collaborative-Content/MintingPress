@@ -26,25 +26,26 @@ function getPullRequestsContract() {
     return getContract(PRS_ADDR, PRsArtifact);
 }
 
-function mint(tokensymbol, supply, ownerStake, initialprice, story, value) {
-    console.log("Minting Story", { tokensymbol, supply, ownerStake, initialprice, story, value });
-    const contract = getContentContract();
+function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
+    console.log("Minting Story", { tokensymbol, supply, ownerStake, PRprice, story, value });
+    const contract = await getContentContract();
     console.log(contract);
+    console.log(contract.address);
 
-    const response = contract.mint(
-        tokensymbol, supply, ownerStake, initialprice, story
+    const account = await getSelectedAddress();
+    console.log("account to connect: ", account);
+    const encoder = new TextEncoder();
+    const tempData = encoder.encode(story);
+    const symbolData = encoder.encode(tokensymbol);
+    
+    const overridesWithETH = {
+        value: value
+    };
+    let response = await contract.mint(
+        symbolData, supply, ownerStake, PRprice, tempData, overridesWithETH
     );
     console.log(response);
-
-    // const encoder = new TextEncoder();
-    // const tempData = encoder.encode(story);
-    
-    // const account = requestAccount();
-    // const overridesWithETH = {
-    //     value: value
-    // };
-    // contract.connect(account).mint(
-    //     tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH)
+    console.log("Balance of account ", account, ": ", pareseInt(await contract.balanceOf(account, 0)));
 }
 
 function getFirstContent() {
