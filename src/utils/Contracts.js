@@ -28,6 +28,45 @@ function getPullRequestsContract() {
     return getContract(PRS_ADDR, PRsArtifact);
 }
 
+async function startContributionPeriod() {
+    console.log("starting contribution period");
+    const adminContract = getAdminContract();
+    console.log("admin contract is ", adminContract);
+    console.log("admin contract address is ", adminContract.address);
+
+    const account = await getSelectedAddress();
+    console.log("account to connect: ", account);
+
+    let response = await adminContract.startContributionPeriod();
+    console.log(response);
+}
+
+async function startVotingPeriod() {
+    console.log("starting voting period");
+    const adminContract = getAdminContract();
+    console.log("admin contract is ", adminContract);
+    console.log("admin contract address is ", adminContract.address);
+
+    const account = await getSelectedAddress();
+    console.log("account to connect: ", account);
+
+    let response = await adminContract.startVotingPeriod();
+    console.log(response);
+}
+
+async function endRound() {
+    console.log("ending round");
+    const adminContract = getAdminContract();
+    console.log("admin contract is ", adminContract);
+    console.log("admin contract address is ", adminContract.address);
+
+    const account = await getSelectedAddress();
+    console.log("account to connect: ", account);
+
+    let response = await adminContract.endRound();
+    console.log(response);
+}
+
 async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
     console.log("Minting Story", { tokensymbol, supply, ownerStake, PRprice, story, value });
     const contract = getContentContract();
@@ -95,8 +134,11 @@ export { getAdminContract,
          getSettingsContract, 
          getContentContract, 
          getBondingCurveContract, 
-         getPullRequestsContract, 
-         mint, 
+         getPullRequestsContract,
+         startContributionPeriod,
+         startVotingPeriod,
+         endRound,
+         mint,
          getFirstContent,
          getVotes,
          getContent }

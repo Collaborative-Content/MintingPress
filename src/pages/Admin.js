@@ -1,39 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Container, Button } from "react-bootstrap";
-import {  } from "../utils/Contracts";
+import { startContributionPeriod, startVotingPeriod, endRound } from "../utils/Contracts";
 
 export default function Admin() {
 
-  function handleStartContributionPeriod() {
-
-  }
-
-  function handleStartVotingPeriod() {
-
-  }
-
-  function handleEndRound() {
-
-  }
-
   return (
     <>
+      <div className="d-grid gap-2">
       <Container>
         <Button
           variant="primary"
           type="submit"
+          size="lg"
           className="btn-block"
-          onClick={handleStartContributionPeriod}
+          onClick={startContributionPeriod}
         >
           Start Contribution Period
-        </Button>
+        </Button> 
       </Container>
       <Container>
         <Button
           variant="primary"
           type="submit"
+          size="lg"
           className="btn-block"
-          onClick={handleStartVotingPeriod}
+          onClick={startVotingPeriod}
         >
           Start Voting Period
         </Button>
@@ -42,12 +33,14 @@ export default function Admin() {
         <Button
           variant="primary"
           type="submit"
+          size="lg"
           className="btn-block"
-          onClick={handleEndRound}
+          onClick={endRound}
         >
           End Round
         </Button>
       </Container>
+      </div>
     </>
   );
 }
