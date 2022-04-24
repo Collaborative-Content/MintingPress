@@ -18,6 +18,7 @@ export default function Navigate() {
             <Nav.Link href="list">Stories List</Nav.Link>
             <Nav.Link href="vote">Vote on Your Stories</Nav.Link>
             <Nav.Link href="submitPR">SubmitPR</Nav.Link>
+            <Nav.Link href="admin">Admin Controls</Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
