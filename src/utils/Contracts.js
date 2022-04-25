@@ -7,6 +7,7 @@ import ContentArtifact from "../abis/Content.json";
 import BCArtifact from "../abis/BondingCurve.json";
 import PRsArtifact from "../abis/PullRequests.json";
 import {v4} from "uuid";
+import {Buffer} from 'buffer';
 
 function getAdminContract() {
     return getContract(ADMIN_ADDR, AdminArtifact);
@@ -89,33 +90,25 @@ async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
     console.log("Balance of account ", account, ": ", contract.balanceOf(account, 0));
 }
 
-function getFirstContent() {
-    console.log("Getting first piece of content");
-    const contract = getContentContract();
-    console.log(contract);
-
-    let firstContent = contract.getContent(1);
-    console.log("First piece of content: ", firstContent);
-    return firstContent;
-}
-
 async function getContent() {
     console.log("Getting content");
     const contract = getContentContract();
-    //console.log(contract);
     const bondingCurve = getBondingCurveContract();
 
     const account = (await getSelectedAddress());
     console.log("account to connect: ", account);
+    
     // need name, story, id
     const contentTokenId = (await contract.contentTokenID()).toNumber();
     console.log("token id: ", contentTokenId);
+
+    const decoder = new TextDecoder();
     let allContent = new Array();
     for (let i=1; i<contentTokenId; i=i+2) {
         let newcontent = {
-            "story": (await contract.getContent(i)).toString(),
-            "id":   v4(),
-            "name": (await bondingCurve.getTokenSymbol(i-1)).toString()
+            "story": Buffer.from((await contract.getContent(i)).slice(2,), 'hex').toString('utf8'),
+            "id": v4(),
+            "name": Buffer.from((await bondingCurve.getTokenSymbol(i-1)).slice(2,), 'hex').toString('utf8')
         };
         allContent.push(newcontent);
     }
@@ -139,6 +132,5 @@ export { getAdminContract,
          startVotingPeriod,
          endRound,
          mint,
-         getFirstContent,
          getVotes,
          getContent }
