@@ -4,6 +4,7 @@ import Mint from "./pages/Mint";
 import List from "./pages/List";
 import PR from "./pages/PR";
 import Vote from "./pages/Vote";
+import Admin from "./pages/Admin";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import React from "react";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/list" element={<List />}></Route>
           <Route path="/vote" element={<Vote />}></Route>
           <Route path="/submitPR" element={<PR />}></Route>
+          <Route path="/admin" element={<Admin />}></Route>
         </Routes>
       </div>
       <div>

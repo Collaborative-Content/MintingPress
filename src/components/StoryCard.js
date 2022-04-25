@@ -1,11 +1,11 @@
 import React from 'react';
 import { Container, Card, Button, Nav } from 'react-bootstrap';
 
-export default function StoryCard({ story}) {
+export default function StoryCard({ story }) {
 
   return (
     <>
-      <div style={{ marginBottom: "20px" }}>
+      <div style={{ marginBottom: "20px", borderWidth: 10, borderColor: 'blue' }}>
       <Container>
       <Card>
       <Card.Body>

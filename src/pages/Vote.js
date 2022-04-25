@@ -10,10 +10,11 @@ export default function Vote({ story }) {
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
-  const [voteCredit, setVoteCredit] = useState(10);
+  const [voteCredit, setVoteCredit] = useState();
  
   useEffect(() => {
-    let address = getSelectedAddress();
+    const address = getSelectedAddress();
+    console.log(address);
     voteCreditsAvailable(0, address);
   }, []);
   

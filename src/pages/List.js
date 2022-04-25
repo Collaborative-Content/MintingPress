@@ -15,21 +15,14 @@ export default function List() {
   }, []);
 
   console.log("stories length: ", stories.length);
-  // if (stories.length === 0) {
-  //   return null;
-  // } else {
-  // return (
-  //   stories.map((story) => {
-  //     <StoryCard story={story} />
-  //   })
-  // );
-  stories.map((story) => {
-    console.log(story);
-  });
 
-  return stories.map((story) => {
-    <StoryCard story={story} />
-  });
-  
-  //}
+  return (
+    <ul>
+      {stories.map(story => (
+        <li key={story.id}>
+          <StoryCard story={story} />
+        </li>
+      ))}
+    </ul>
+  );
 }
