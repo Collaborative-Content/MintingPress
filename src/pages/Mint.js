@@ -14,7 +14,7 @@ export default function Mint() {
   const storyRef = useRef()
 
   const [fields, setFields] = useState({
-    story: "this is the story",
+    story: "start your story here",
     supply: "",
     stake:"",
     symbol: "",
@@ -62,30 +62,6 @@ export default function Mint() {
       </FloatingLabel>
       </Container>
       <Container> 
-      
-{/* from rahul's react branch */}
-{/* import React from "react";
-// TODO how do we get the storyRef here, and move handleAddStory here
-export default function Mint() {
-  const mint = () => {
-    setTimeout(() => {
-      toast("Your story has been minted!");
-    }, 1000);
-  };
-
-  return (
-    <>
-      <Container>
-        <div className="text-center">
-          <img
-            style={{ height: "200px", margin: "20px auto", width: "200px" }}
-            src="https://cdn.discordapp.com/attachments/931173500289437817/937359950659858512/pp2.png"
-          />
-        </div>
-
-        <StoryBox story={""} />
-      </Container>
-      <Container>  */}
 
       <Row className="mb-3">
     <Form.Group as={Col} controlId="formGridTokenSymbol">
