@@ -102,13 +102,13 @@ async function getContent() {
     const contentTokenId = (await contract.contentTokenID()).toNumber();
     console.log("token id: ", contentTokenId);
 
-    const decoder = new TextDecoder();
     let allContent = new Array();
     for (let i=1; i<contentTokenId; i=i+2) {
         let newcontent = {
-            "story": Buffer.from((await contract.getContent(i)).slice(2,), 'hex').toString('utf8'),
-            "id": v4(),
-            "name": Buffer.from((await bondingCurve.getTokenSymbol(i-1)).slice(2,), 'hex').toString('utf8')
+            "content": Buffer.from((await contract.getContent(i)).slice(2,), 'hex').toString('utf8'),
+            "key": v4(),
+            "content_token_id": i,
+            "token_symbol": Buffer.from((await bondingCurve.getTokenSymbol(i-1)).slice(2,), 'hex').toString('utf8')
         };
         allContent.push(newcontent);
     }
