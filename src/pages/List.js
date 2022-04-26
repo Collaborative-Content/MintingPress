@@ -19,7 +19,7 @@ export default function List() {
   return (
     <ul>
       {stories.map(story => (
-        <li key={story.id}>
+        <li key={story.key}>
           <StoryCard story={story} />
         </li>
       ))}
