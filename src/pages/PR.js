@@ -4,7 +4,7 @@ import { useHistory, useParams } from 'react-router-dom'
 import { getSpecifiedContent } from '../utils/Contracts';
 import StoryBox from "../components/StoryBox";
 import { toast } from "react-toastify";
-import { submitPR } from '../utils/Contracts';
+import { submitPR, getPRexists } from '../utils/Contracts';
 
 export default function PR() {
 
@@ -33,10 +33,10 @@ export default function PR() {
   }
 
   function handleSubmitPR() {
-    toast("Pull request submitted!");
-
     submitPR(fields.text, id, fields.val)
     console.log("PR text:", fields.text, "; content id:", id, "; value:", fields.val)
+    const isPRexists = getPRexists(id);
+    // toast("Pull request submitted!");
   }
 
   return (
