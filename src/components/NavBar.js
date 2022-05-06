@@ -10,7 +10,7 @@ export default function Navigate() {
       style={{ marginBottom: "25px" }}
     >
       <Container>
-        <Navbar.Brand href="/mint">MintingPress</Navbar.Brand>
+        <Navbar.Brand href="/">MintingPress</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
