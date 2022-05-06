@@ -116,6 +116,23 @@ async function getContent() {
     return allContent;
 }
 
+async function getSpecifiedContent(id) {
+    const contract = getContentContract();
+    const bondingCurve = getBondingCurveContract();
+
+    const account = (await getSelectedAddress());
+
+    let returnStory = {
+        "content": Buffer.from((await contract.getContent(id)).slice(2,), 'hex').toString('utf8'),
+        "key": v4(),
+        "content_token_id": id,
+        "token_symbol": Buffer.from((await bondingCurve.getTokenSymbol(id-1)).slice(2,), 'hex').toString('utf8')
+    };
+    
+    console.log("fetching story ", returnStory);
+    return returnStory;
+}
+
 async function getVotes(tokenID, address) {
     const contract = getContentContract();
     let credits = await contract.voteCredits(tokenID, address);
@@ -133,4 +150,5 @@ export { getAdminContract,
          endRound,
          mint,
          getVotes,
-         getContent }
+         getContent,
+         getSpecifiedContent }
