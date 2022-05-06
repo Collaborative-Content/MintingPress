@@ -68,28 +68,6 @@ async function endRound() {
     console.log(response);
 }
 
-async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
-    console.log("Minting Story", { tokensymbol, supply, ownerStake, PRprice, story, value });
-    const contract = getContentContract();
-    console.log(contract);
-    console.log(contract.address);
-
-    const account = await getSelectedAddress();
-    console.log("account to connect: ", account);
-    const encoder = new TextEncoder();
-    const tempData = encoder.encode(story);
-    const symbolData = encoder.encode(tokensymbol);
-    
-    const overridesWithETH = {
-        value: value
-    };
-    let response = await contract.mint(
-        symbolData, supply, ownerStake, PRprice, tempData, overridesWithETH
-    );
-    console.log(response);
-    console.log("Balance of account ", account, ": ", contract.balanceOf(account, 0));
-}
-
 async function getContent() {
     console.log("Getting content");
     const contract = getContentContract();
@@ -133,6 +111,41 @@ async function getSpecifiedContent(id) {
     return returnStory;
 }
 
+async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
+    console.log("Minting Story", { tokensymbol, supply, ownerStake, PRprice, story, value });
+    const contract = getContentContract();
+
+    const account = await getSelectedAddress();
+    const encoder = new TextEncoder();
+    const tempData = encoder.encode(story);
+    const symbolData = encoder.encode(tokensymbol);
+    
+    const overridesWithETH = {
+        value: value
+    };
+    let response = await contract.mint(
+        symbolData, supply, ownerStake, PRprice, tempData, overridesWithETH
+    );
+    console.log(response);
+    // console.log("Balance of account ", account, ": ", contract.balanceOf(account, 0));
+}
+
+async function submitPR(prText, tokenID, value) {
+    console.log("Submitting PR", { prText, tokenID, value });
+    const contract = getPullRequestsContract();
+
+    const account = await getSelectedAddress();
+    const encoder = new TextEncoder();
+    const tempData = encoder.encode(prText);
+
+    const overridesWithETH = {
+        value: value
+    };
+    await contract.submitPR(
+        tempData, tokenID, account, overridesWithETH
+    );
+}
+
 async function getVotes(tokenID, address) {
     const contract = getContentContract();
     let credits = await contract.voteCredits(tokenID, address);
@@ -149,6 +162,7 @@ export { getAdminContract,
          startVotingPeriod,
          endRound,
          mint,
-         getVotes,
          getContent,
-         getSpecifiedContent }
+         getSpecifiedContent,
+         submitPR,
+         getVotes }

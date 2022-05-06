@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { Container, Card, Form, FloatingLabel, Nav } from "react-bootstrap";
+import { Button, Card, Container, FloatingLabel, Form, Nav } from "react-bootstrap";
 import { useHistory, useParams } from 'react-router-dom'
 import { getSpecifiedContent } from '../utils/Contracts';
 import StoryBox from "../components/StoryBox";
 import { toast } from "react-toastify";
+import { submitPR } from '../utils/Contracts';
 
 export default function PR() {
 
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
   const { id } = useParams();
   console.log("PR page for story id ", id);
-  const [pr, setPr] = useState([]);
+  
+  const [fields, setFields] = useState({
+    text: "",
+    val: "",
+  })
 
   React.useEffect(() => {
     async function fetchStory (id) {
@@ -20,13 +25,18 @@ export default function PR() {
     fetchStory(id);
   }, []);
 
+  const handleInputChange = (e) => {
+    setFields({
+        ...fields,
+        [e.target.name]:e.target.value
+    })
+  }
+
   function handleSubmitPR() {
     toast("Pull request submitted!");
 
-    const price = pr.current.value;
-    //sign and send the PR and handle any exceptions
-    console.log(price);
-    // invoke SC submitPR method
+    submitPR(fields.text, id, fields.val)
+    console.log("PR text:", fields.text, "; content id:", id, "; value:", fields.val)
   }
 
   return (
@@ -47,19 +57,37 @@ export default function PR() {
           style={{ marginBottom: "25px" }}
         >
           <Form.Control
+            name="text"
             as="textarea"
             placeholder="Leave a comment here"
             style={{ height: "200px" }}
+            onChange={handleInputChange}
           />
         </FloatingLabel>
-        <label>Price for PR</label>
+        {/* <label>Price for PR</label>
         <br />
-        <input className="form-control" type="text" ref={pr} />
-        <br />
-        <button class="btn btn-primary" onClick={handleSubmitPR}>
-          Submit Pull Request
-        </button>
-      </Container>
+        <input className="form-control" type="text" onChange={handleInputChange}/>
+        <br /> */}
+        <Form.Group>
+          <Form.Label>ETH Value</Form.Label>
+          <Form.Control 
+              name="val"
+              value={fields.val}
+              onChange={handleInputChange}
+            />
+        </Form.Group>
+        </Container>
+
+        <Container>
+          <Button
+            variant="primary"
+            type="submit"
+            className="btn-block"
+            onClick={handleSubmitPR}
+          >
+            Submit Pull Request!
+          </Button>
+        </Container>
     </>
   );
 }
