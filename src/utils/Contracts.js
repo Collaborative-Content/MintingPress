@@ -147,6 +147,13 @@ async function submitPR(prText, tokenID, prVal, value) {
     );
 }
 
+async function getPRexists(tokenID) {
+    const contract = getPullRequestsContract();
+    const account = (await getSelectedAddress());
+    let isPRexists = await contract.getPRexists(account, tokenID)
+    console.log("PR for address ", account, " and token ID ", tokenID, " exists: ", isPRexists);
+}
+
 async function getVotes(tokenID, address) {
     const contract = getContentContract();
     let credits = await contract.voteCredits(tokenID, address);
@@ -166,4 +173,5 @@ export { getAdminContract,
          getContent,
          getSpecifiedContent,
          submitPR,
+         getPRexists,
          getVotes }
