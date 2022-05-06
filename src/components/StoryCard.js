@@ -13,7 +13,7 @@ export default function StoryCard({ story }) {
         <Card.Text>
           {story.content}
         </Card.Text>
-        <Nav.Link href={story.content_token_id + "/submitPR"}>
+        <Nav.Link href={"story/" + story.content_token_id}>
           <a className="btn btn-primary">View Story</a>
         </Nav.Link>
       </Card.Body>

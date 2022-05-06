@@ -11,7 +11,9 @@ import React from "react";
 import { ToastContainer } from "react-toastify";
 import { requestAccount } from './utils/common';
 import {v4} from 'uuid';
-import { getContent } from "./utils/Contracts";
+import { getContent, getSpecifiedContent } from "./utils/Contracts";
+import StoryCard from "./components/StoryCard";
+import StorySingle from "./components/StorySingle";
 
 function App() {
 
@@ -33,10 +35,10 @@ function App() {
         <Routes>
           <Route path="/" element={<Mint />}></Route>
           <Route path="/mint" element={<Mint />}></Route>
-          <Route path="/view-story/:id" element={<PR id={""} />}></Route>
           <Route path="/list" element={<List />}></Route>
-          <Route path="/vote" element={<Vote />}></Route>
+          <Route path="/story/:id" element={<StorySingle />}></Route>
           <Route path="/submitPR" element={<PR />}></Route>
+          <Route path="/vote" element={<Vote />}></Route>
           <Route path="/admin" element={<Admin />}></Route>
         </Routes>
       </div>
