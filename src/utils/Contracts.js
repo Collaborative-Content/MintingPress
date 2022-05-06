@@ -130,8 +130,8 @@ async function mint(tokensymbol, supply, ownerStake, PRprice, story, value) {
     // console.log("Balance of account ", account, ": ", contract.balanceOf(account, 0));
 }
 
-async function submitPR(prText, tokenID, value) {
-    console.log("Submitting PR", { prText, tokenID, value });
+async function submitPR(prText, tokenID, prVal, value) {
+    console.log("Submitting PR", { prText, tokenID, prVal });
     const contract = getPullRequestsContract();
 
     const account = await getSelectedAddress();
@@ -141,8 +141,9 @@ async function submitPR(prText, tokenID, value) {
     const overridesWithETH = {
         value: value
     };
+    console.log("account ", account);
     await contract.submitPR(
-        tempData, tokenID, account, overridesWithETH
+        tempData, tokenID, account, prVal, overridesWithETH
     );
 }
 
