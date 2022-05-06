@@ -6,10 +6,7 @@ import { getSpecifiedContent } from '../utils/Contracts';
 export default function StorySingle() {
   
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
-//   const [storyID, setStoryID] = React.useState([]);
   const { id } = useParams();
-//   setStoryID(id);
-
   console.log("Single Story component, fetching story id ", id);
   
   React.useEffect(() => {
