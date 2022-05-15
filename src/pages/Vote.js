@@ -6,7 +6,7 @@ import { getVotes } from "../utils/Contracts";
 import { toast } from "react-toastify";
 import { getSelectedAddress } from "../utils/common";
 
-export default function Vote({ story }) {
+export default function Vote({ story, tokenID }) {
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
@@ -15,7 +15,7 @@ export default function Vote({ story }) {
   useEffect(() => {
     const address = getSelectedAddress();
     console.log(address);
-    voteCreditsAvailable(0, address);
+    voteCreditsAvailable(tokenID, address);
   }, []);
   
   async function voteCreditsAvailable(tokenID, address) {

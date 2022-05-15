@@ -18,6 +18,7 @@ contract PullRequests is Ownable {
 
     mapping(uint => mapping(address => PR)) public PRs;
     mapping(uint => mapping(address => bool)) public PRexists;
+    mapping(uint => PR) public PRlist;
     mapping(uint => address[]) public PRauthors;
 
 
@@ -42,6 +43,13 @@ contract PullRequests is Ownable {
                                        negativeVotes: 0,
                                        totalVotes: 0
                                     });
+        PRlist[tokenID] = PR({content: _PRtext, 
+                              blockTimestamp: block.timestamp,
+                              PRPrice: value,
+                              positiveVotes: 0,
+                              negativeVotes: 0,
+                              totalVotes: 0
+                             });
         PRexists[tokenID][caller] = true;
     }
     
@@ -120,4 +128,7 @@ contract PullRequests is Ownable {
         return PRexists[tokenID][_PRowner];
     }
 
+    function getPRListByContentID(uint tokenID) view external returns(bytes memory) {
+        return PRlist[tokenID].content;
+    }
 }
