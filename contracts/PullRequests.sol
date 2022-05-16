@@ -18,9 +18,9 @@ contract PullRequests is Ownable {
 
     mapping(uint => mapping(address => PR)) public PRs;
     mapping(uint => mapping(address => bool)) public PRexists;
-    mapping(uint => PR) public PRlist;
+    mapping(uint => mapping(uint => PR)) public PRlist;
     mapping(uint => address[]) public PRauthors;
-
+    mapping(uint => uint) public PRsPerTokenID;
 
     function votePR(address _PRowner, uint _numVotes, bool positive, uint tokenID) external onlyOwner {
         require(PRexists[tokenID][_PRowner], "PR does not exist");
@@ -43,7 +43,8 @@ contract PullRequests is Ownable {
                                        negativeVotes: 0,
                                        totalVotes: 0
                                     });
-        PRlist[tokenID] = PR({content: _PRtext, 
+        PRsPerTokenID[tokenID] += 1;
+        PRlist[tokenID][PRsPerTokenID[tokenID]] = PR({content: _PRtext, 
                               blockTimestamp: block.timestamp,
                               PRPrice: value,
                               positiveVotes: 0,
@@ -128,7 +129,11 @@ contract PullRequests is Ownable {
         return PRexists[tokenID][_PRowner];
     }
 
-    function getPRListByContentID(uint tokenID) view external returns(bytes memory) {
-        return PRlist[tokenID].content;
+    function getPrLengthByTokenID(uint tokenID) external view returns(uint) {
+        return PRsPerTokenID[tokenID];
+    }
+    
+    function getPRListByContentID(uint tokenID, uint index) external view returns(bytes memory) {
+        return PRlist[tokenID][index].content;
     }
 }
