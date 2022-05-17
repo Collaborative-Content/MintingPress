@@ -183,7 +183,7 @@ async function getVotes(tokenID, address) {
 }
 
 async function submitVote(tokenID, address, positive, numVotes) {
-
+    
 }
 export { getAdminContract, 
          getSettingsContract, 
