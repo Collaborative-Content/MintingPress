@@ -68,25 +68,6 @@ async function endRound() {
     console.log(response);
 }
 
-async function getPRList(tokenID) {
-    console.log('getting list of PRs for a given tokenID');
-    const PRContract = getPullRequestsContract();
-    console.log("PullRequestContract address: ", PRContract.address);
-    
-    const numberOfPRs = (await PRContract.getPrLengthByTokenID(tokenID)).toNumber();
-    let PRlist = [];
-    
-    for (let i=1; i <= numberOfPRs; i++){
-        let newPR = {
-            "id": v4(),
-            "content": Buffer.from((await PRContract.getPRListByContentID(tokenID, i)).slice(2,),'hex').toString('utf-8') 
-        }
-        PRlist.push(newPR);
-    }
-    console.log("Active Pull Requests:", PRlist);
-    return PRlist
-}
-
 async function getContent() {
     console.log("Getting content");
     const contract = getContentContract();
@@ -173,6 +154,26 @@ async function getPRexists(tokenID) {
     console.log("PR for address ", account, " and token ID ", tokenID, " exists: ", isPRexists);
 }
 
+async function getPRsList(tokenID) {
+    console.log('getting list of PRs for a given tokenID');
+    const PRContract = getPullRequestsContract();
+    console.log("PullRequestContract address: ", PRContract.address);
+    
+    const numberOfPRs = (await PRContract.getPrLengthByTokenID(tokenID)).toNumber();
+    let PRlist = [];
+    
+    for (let i=1; i <= numberOfPRs; i++){
+        let newPR = {
+            "id": v4(),
+            "index": i,
+            "content": Buffer.from((await PRContract.getPRListByContentID(tokenID, i)).slice(2,),'hex').toString('utf-8') 
+        }
+        PRlist.push(newPR);
+    }
+    console.log("Active Pull Requests:", PRlist);
+    return PRlist
+}
+
 async function getVotes(tokenID, address) {
     const contract = getContentContract();
     let credits = await contract.voteCredits(tokenID, address);
@@ -194,4 +195,4 @@ export { getAdminContract,
          submitPR,
          getPRexists,
          getVotes,
-         getPRList }
+         getPRsList }

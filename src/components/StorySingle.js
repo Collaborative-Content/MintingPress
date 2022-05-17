@@ -1,11 +1,14 @@
 import React from 'react';
 import { Container, Card, Nav } from 'react-bootstrap';
 import { useHistory, useParams } from 'react-router-dom'
-import { getSpecifiedContent } from '../utils/Contracts';
+import PR from '../pages/PR';
+import ViewPR from '../components/ViewPR';
+import { getSpecifiedContent, getPRsList } from '../utils/Contracts';
 
 export default function StorySingle() {
   
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
+  const [PRsList, setPRsList] = React.useState([]);
   const { id } = useParams();
   console.log("Single Story component, fetching story id ", id);
   
@@ -15,6 +18,12 @@ export default function StorySingle() {
       setSpecifiedStory(response);
     };
     fetchStory(id);
+
+    async function fetchPRs (id) {
+      const response = await getPRsList(id);
+      setPRsList(response);
+    };
+    fetchPRs(id);
   }, []);
 
   return (
@@ -32,6 +41,15 @@ export default function StorySingle() {
         </Nav.Link>
       </Card.Body>
     </Card>
+    </Container>
+    <Container>
+    <ul>
+      {PRsList.map(singlePR => (
+        <li key={singlePR.key}>
+          <ViewPR singlePR={singlePR} />
+        </li>
+      ))}
+    </ul>
     </Container>
     </div>
     </>
