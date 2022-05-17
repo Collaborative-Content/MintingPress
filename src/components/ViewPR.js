@@ -15,11 +15,11 @@ export default function ViewPR({ singlePR }) {
         <Card.Text>
           {singlePR.content}
         </Card.Text>
-        <Nav.Link>
-          <a className="btn btn-primary">Upvote</a>
-        </Nav.Link>
-        <Nav.Link>
-          <a className="btn btn-primary">Downvote</a>
+        <Card.Text>
+          {singlePR.author}
+        </Card.Text>
+        <Nav.Link href={"vote/"+singlePR.index}>
+          <a className="btn btn-primary">Vote</a>
         </Nav.Link>
       </Card.Body>
     </Card>

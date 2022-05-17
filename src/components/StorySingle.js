@@ -18,13 +18,13 @@ export default function StorySingle() {
       setSpecifiedStory(response);
     };
     fetchStory(id);
-
-    async function fetchPRs (id) {
-      const response = await getPRsList(id);
-      setPRsList(response);
-    };
     fetchPRs(id);
   }, []);
+
+  async function fetchPRs (id) {
+    const response = await getPRsList(id);
+    setPRsList(response);
+  };
 
   return (
     <>

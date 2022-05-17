@@ -166,7 +166,8 @@ async function getPRsList(tokenID) {
         let newPR = {
             "id": v4(),
             "index": i,
-            "content": Buffer.from((await PRContract.getPRListByContentID(tokenID, i)).slice(2,),'hex').toString('utf-8') 
+            "content": Buffer.from((await PRContract.getPRListByContentID(tokenID, i)).slice(2,),'hex').toString('utf-8'),
+            "author": await PRContract.getPRAuthor(tokenID, i) 
         }
         PRlist.push(newPR);
     }
@@ -181,6 +182,9 @@ async function getVotes(tokenID, address) {
     return credits;
 }
 
+async function submitVote(tokenID, address, positive, numVotes) {
+
+}
 export { getAdminContract, 
          getSettingsContract, 
          getContentContract, 
