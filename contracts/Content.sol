@@ -118,7 +118,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits() external onlyOwner {
+    function _assignVoteCredits() external {
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
@@ -170,5 +170,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         // existing content + new lines + winning PR
         uint amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
+    }
+
+    function getVoteCredits(uint tokenID, address author) external view returns(uint) {
+        return voteCredits[tokenID][author];
+    }
+
+    function getBalanceOfAccount(uint tokenID, address account) external view returns(uint){
+        return balanceOf(account, tokenID);
     }
 }
