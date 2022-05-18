@@ -41,7 +41,7 @@ export default function Vote() {
     voteCreditsAvailable(id);
   }, []);
 
-  // function handleVote() {
+  function handleVote() {
   //   if(voteCredit > 0){
   //     const voteCreditsUsed = voteRef.current.value;
   //     const approve = approveRef.current.value;
@@ -60,7 +60,7 @@ export default function Vote() {
   //   } else {
   //     toast('You do not have the vote credits to perform that operation');
   //   }
-  // }
+  }
 
   return (
     <>
