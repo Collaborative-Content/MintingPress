@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import Navigate from "../components/NavBar";
 import StoryBox from "../components/StoryBox";
+import { useHistory, useParams } from 'react-router-dom'
 import { getVotes, getSpecifiedContent } from "../utils/Contracts";
 import { toast } from "react-toastify";
 import { getSelectedAddress } from "../utils/common";
@@ -9,12 +10,17 @@ import StoryCard from "../components/StoryCard";
 import SubmitPR from "./SubmitPR";
 
 
-export default function Vote({tokenID, content, prAddress}) {
+export default function Vote() {
   const [stories, setStories] = useState([]);
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
   const [voteCredit, setVoteCredit] = useState();
+
+  const { id } = useParams();
+  const { pr_id } = useParams();
+  console.log("Vote page, fetching story id ", id);
+  console.log("Vote page, fetching PR id ", pr_id);
  
   useEffect(() => {
     const address = getSelectedAddress();
