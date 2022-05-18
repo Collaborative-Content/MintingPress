@@ -23,7 +23,7 @@ function App() {
           <Route path="/list" element={<List />}></Route>
           <Route path="/story/:id" element={<StorySingle />}></Route>
           <Route path="/story/:id/submitPR" element={<SubmitPR />}></Route>
-          <Route path="/vote/:prID" element={<Vote />}></Route>
+          <Route path="/story/:id/:pr-id/vote" element={<Vote />}></Route>
           <Route path="/admin" element={<Admin />}></Route>
         </Routes>
       </div>

@@ -5,6 +5,10 @@ import { getSpecifiedContent } from '../utils/Contracts';
 
 export default function ViewPR({ singlePR }) {
 
+  const { id } = useParams();
+  console.log("View PR component, story ID ", id);
+  console.log("View PR component, PR details ", singlePR);
+  
   return (
     <>
       <div style={{ marginBottom: "20px", borderWidth: 10, borderColor: 'blue' }}>
@@ -18,7 +22,7 @@ export default function ViewPR({ singlePR }) {
         <Card.Text>
           {singlePR.author}
         </Card.Text>
-        <Nav.Link href={"vote/"+singlePR.index}>
+        <Nav.Link href={id + "/" + singlePR.index + "/vote"}>
           <a className="btn btn-primary">Vote</a>
         </Nav.Link>
       </Card.Body>
