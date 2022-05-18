@@ -36,7 +36,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     //mapping(uint => mapping(address => bool)) votesToComplete;
 
     event NewPR(address PRowner, uint tokenID, uint PRPrice);
-    event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
+    event Voted(address voter, uint PRindex, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
     event NewContentMinted(uint tokenID, address creator);
@@ -128,12 +128,12 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit VoteCreditsAssigned();
     }
 
-    function vote(address _PRowner, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
+    function vote(uint PRindex, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
-        PRsContract.votePR(_PRowner, _numVotes, positive, ownertokenId+1);
+        PRsContract.votePR(PRindex, _numVotes, positive, ownertokenId+1);
         voteCredits[ownertokenId][msg.sender] -= (_numVotes ** 2); 
-        emit Voted(msg.sender, _PRowner, _numVotes, positive, ownertokenId+1);
+        emit Voted(msg.sender, PRindex, _numVotes, positive, ownertokenId+1);
     }
 
     // function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {
