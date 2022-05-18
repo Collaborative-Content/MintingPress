@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
-import Navigate from "../components/NavBar";
-import StoryBox from "../components/StoryBox";
+import { Container, Card, Nav } from "react-bootstrap";
 import { useHistory, useParams } from 'react-router-dom'
-import { getVotes, getSpecifiedContent } from "../utils/Contracts";
+import { getVotes, getSpecifiedContent, getPRsList } from "../utils/Contracts";
 import { toast } from "react-toastify";
-import { getSelectedAddress } from "../utils/common";
-import StoryCard from "../components/StoryCard";
-import SubmitPR from "./SubmitPR";
-
 
 export default function Vote() {
-  const [stories, setStories] = useState([]);
+  const [specifiedStory, setSpecifiedStory] = React.useState([]);
+  const [PRsList, setPRsList] = React.useState([]);
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
@@ -23,42 +18,62 @@ export default function Vote() {
   console.log("Vote page, fetching PR id ", pr_id);
  
   useEffect(() => {
-    const address = getSelectedAddress();
-    console.log(address);
-    setStories(content);
-    voteCreditsAvailable(tokenID-1, address);
+    async function fetchStory (id) {
+      const response = await getSpecifiedContent(id);
+      setSpecifiedStory(response);
+    };
+    async function fetchPRs (id) {
+      const response = await getPRsList(id);
+      setPRsList(response);
+    };
+    fetchStory(id);
+    fetchPRs(id);
+
+    // async function voteCreditsAvailable(tokenID, address) {
+    //   let credits = await getVotes(tokenID, address);
+    //   setVoteCredit(parseInt(credits));
+    // }
+    // voteCreditsAvailable(tokenID-1, address);
   }, []);
-  
-  async function voteCreditsAvailable(tokenID, address) {
-    let credits = await getVotes(tokenID, address);
-    setVoteCredit(parseInt(credits));
-  }
 
-  function handleVote() {
-    if(voteCredit > 0){
-      const voteCreditsUsed = voteRef.current.value;
-      const approve = approveRef.current.value;
-      const deny = denyRef.current.value;
-      const prAuthor = prAddress;
-      let positive = approve > 0 ? 1 :  0;
-      console.log(voteCreditsUsed, approve, deny);
+  // function handleVote() {
+  //   if(voteCredit > 0){
+  //     const voteCreditsUsed = voteRef.current.value;
+  //     const approve = approveRef.current.value;
+  //     const deny = denyRef.current.value;
+  //     const prAuthor = prAddress;
+  //     let positive = approve > 0 ? 1 :  0;
+  //     console.log(voteCreditsUsed, approve, deny);
 
-      if(voteCreditsUsed <= voteCredit) {
-        setVoteCredit(voteCredit - voteCreditsUsed);
+  //     if(voteCreditsUsed <= voteCredit) {
+  //       setVoteCredit(voteCredit - voteCreditsUsed);
 
-        toast("Your vote has been submitted!!");
-      } else {
-        toast("You cannot cast more votes than available");
-      }
-    } else {
-      toast('You do not have the vote credits to perform that operation');
-    }
-  }
+  //       toast("Your vote has been submitted!!");
+  //     } else {
+  //       toast("You cannot cast more votes than available");
+  //     }
+  //   } else {
+  //     toast('You do not have the vote credits to perform that operation');
+  //   }
+  // }
 
   return (
     <>
       <Container>
-        <StoryCard story={stories} />
+        <Card>
+        <Card.Body>
+          <Card.Title>{specifiedStory.token_symbol}</Card.Title>
+          <Card.Text>
+            {specifiedStory.content}
+          </Card.Text>
+          <Nav.Link href={id + "/submitPR"}>
+            <a className="btn btn-primary">Submit PR</a>
+          </Nav.Link>
+        </Card.Body>
+        </Card>
+      </Container>
+      <Container>
+        {/* <StoryCard story={stories} />
         <label>Vote Credits Available: {voteCredit}</label>
         <div>
           <label>Vote Credits to be used:</label>
@@ -79,7 +94,7 @@ export default function Vote() {
               Submit Your Vote!
             </button>
           </div>
-        </div>
+        </div> */}
       </Container>
     </>
   );
