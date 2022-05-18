@@ -175,9 +175,12 @@ async function getPRsList(tokenID) {
     return PRlist
 }
 
-async function getVotes(tokenID, address) {
+async function getVotes(tokenID) {
+    const account = await getSelectedAddress();
+    console.log("account: ", account);
     const contract = getContentContract();
-    let credits = await contract.voteCredits(tokenID, address);
+    
+    let credits = await contract.voteCredits(tokenID-1, account);
     console.log(credits);
     return credits;
 }

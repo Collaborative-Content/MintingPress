@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Card, Nav } from "react-bootstrap";
 import { useHistory, useParams } from 'react-router-dom'
+import { getSelectedAddress, requestAccount } from "../utils/common";
 import { getVotes, getSpecifiedContent, getPRsList } from "../utils/Contracts";
 import { toast } from "react-toastify";
 
 export default function Vote() {
-  const [specifiedStory, setSpecifiedStory] = React.useState([]);
-  const [PRsList, setPRsList] = React.useState([]);
+  const [specifiedStory, setSpecifiedStory] = useState([]);
+  const [specifiedPR, setSpecifiedPR] = useState([]);
+  const [voteCredit, setVoteCredit] = useState();
   const [voteRef] = useState([]);
   const [approveRef] = useState([]);
   const [denyRef] = useState([]);
-  const [voteCredit, setVoteCredit] = useState();
 
   const { id } = useParams();
   const { pr_id } = useParams();
@@ -21,19 +22,23 @@ export default function Vote() {
     async function fetchStory (id) {
       const response = await getSpecifiedContent(id);
       setSpecifiedStory(response);
+      console.log("Story: ", response);
     };
-    async function fetchPRs (id) {
-      const response = await getPRsList(id);
-      setPRsList(response);
+    async function fetchPR (id, pr_id) {
+      const responseList = await getPRsList(id);
+      const response = responseList[pr_id-1];
+      setSpecifiedPR(response);
+      console.log("PR for story: ", response);
     };
+    // could add 'connect to metamask' button to get the user address
+    async function voteCreditsAvailable(id) {
+      let credits = await getVotes(id);
+      setVoteCredit(parseInt(credits));
+      console.log("vote credits available: ", voteCredit);
+    }
     fetchStory(id);
-    fetchPRs(id);
-
-    // async function voteCreditsAvailable(tokenID, address) {
-    //   let credits = await getVotes(tokenID, address);
-    //   setVoteCredit(parseInt(credits));
-    // }
-    // voteCreditsAvailable(tokenID-1, address);
+    fetchPR(id, pr_id);
+    voteCreditsAvailable(id);
   }, []);
 
   // function handleVote() {
@@ -61,21 +66,32 @@ export default function Vote() {
     <>
       <Container>
         <Card>
-        <Card.Body>
-          <Card.Title>{specifiedStory.token_symbol}</Card.Title>
-          <Card.Text>
-            {specifiedStory.content}
-          </Card.Text>
-          <Nav.Link href={id + "/submitPR"}>
-            <a className="btn btn-primary">Submit PR</a>
-          </Nav.Link>
-        </Card.Body>
+          <Card.Body>
+            <Card.Title>{specifiedStory.token_symbol}</Card.Title>
+            <Card.Text>
+              {specifiedStory.content}
+            </Card.Text>
+          </Card.Body>
+        </Card>
+        <Card>
+          <Card.Body>
+            <Card.Text>
+              {specifiedPR.content}
+            </Card.Text>
+            <Card.Text>
+              PR ID:
+              {specifiedPR.index}
+            </Card.Text>
+            <Card.Text>
+              PR Author:
+              {specifiedPR.author}
+            </Card.Text>
+          </Card.Body>
         </Card>
       </Container>
       <Container>
-        {/* <StoryCard story={stories} />
         <label>Vote Credits Available: {voteCredit}</label>
-        <div>
+        {/* <div>
           <label>Vote Credits to be used:</label>
           <input type="text" className="form-control" ref={voteRef}></input>
           <br />
