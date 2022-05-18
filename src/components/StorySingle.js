@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Card, Nav } from 'react-bootstrap';
 import { useHistory, useParams } from 'react-router-dom'
-import PR from '../pages/PR';
+import SubmitPR from '../pages/SubmitPR';
 import ViewPR from '../components/ViewPR';
 import { getSpecifiedContent, getPRsList } from '../utils/Contracts';
 

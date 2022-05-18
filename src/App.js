@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navigate from "./components/NavBar";
 import Mint from "./pages/Mint";
 import List from "./pages/List";
-import PR from "./pages/PR";
+import SubmitPR from "./pages/SubmitPR";
 import Vote from "./pages/Vote";
 import Admin from "./pages/Admin";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -22,7 +22,7 @@ function App() {
           <Route path="/mint" element={<Mint />}></Route>
           <Route path="/list" element={<List />}></Route>
           <Route path="/story/:id" element={<StorySingle />}></Route>
-          <Route path="/story/:id/submitPR" element={<PR />}></Route>
+          <Route path="/story/:id/submitPR" element={<SubmitPR />}></Route>
           <Route path="/vote/:prID" element={<Vote />}></Route>
           <Route path="/admin" element={<Admin />}></Route>
         </Routes>

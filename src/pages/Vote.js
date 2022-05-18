@@ -6,7 +6,7 @@ import { getVotes, getSpecifiedContent } from "../utils/Contracts";
 import { toast } from "react-toastify";
 import { getSelectedAddress } from "../utils/common";
 import StoryCard from "../components/StoryCard";
-import PR from "./PR";
+import SubmitPR from "./SubmitPR";
 
 
 export default function Vote({tokenID, content, prAddress}) {

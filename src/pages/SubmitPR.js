@@ -6,7 +6,7 @@ import StoryBox from "../components/StoryBox";
 import { toast } from "react-toastify";
 import { submitPR, getPRexists } from '../utils/Contracts';
 
-export default function PR() {
+export default function SubmitPR() {
 
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
   const { id } = useParams();
