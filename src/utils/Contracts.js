@@ -180,13 +180,19 @@ async function getVotes(tokenID) {
     console.log("account: ", account);
     const contract = getContentContract();
     
-    let credits = await contract.voteCredits(tokenID-1, account);
+    await contract._assignVoteCredits();
+    let credits = await contract.getVoteCredits(tokenID-1, account);
+    
     console.log(credits);
+    console.log(tokenID-1);
+
+    let accountBalance = await contract.getBalanceOfAccount(tokenID-1, account);
+    console.log("this is your balance of tokens:", parseInt(accountBalance));
     return credits;
 }
 
 async function submitVote(tokenID, address, positive, numVotes) {
-    
+
 }
 export { getAdminContract, 
          getSettingsContract, 
