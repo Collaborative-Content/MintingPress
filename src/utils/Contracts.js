@@ -179,8 +179,7 @@ async function getVotes(tokenID) {
     const account = await getSelectedAddress();
     console.log("account: ", account);
     const contract = getContentContract();
-    
-    await contract._assignVoteCredits();
+
     let credits = await contract.getVoteCredits(tokenID-1, account);
     
     console.log(credits);
