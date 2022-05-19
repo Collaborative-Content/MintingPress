@@ -74,7 +74,7 @@ async function getContent() {
     const contentTokenId = (await contract.contentTokenID()).toNumber();
     console.log("token id: ", contentTokenId);
 
-    let allContent = new Array();
+    let allContent = [];
     for (let i=1; i<contentTokenId; i=i+2) {
         let newcontent = {
             "content": Buffer.from((await contract.getContent(i)).slice(2,), 'hex').toString('utf8'),
@@ -91,8 +91,6 @@ async function getContent() {
 async function getSpecifiedContent(id) {
     const contract = getContentContract();
     const bondingCurve = getBondingCurveContract();
-
-    const account = (await getSelectedAddress());
 
     let returnStory = {
         "content": Buffer.from((await contract.getContent(id)).slice(2,), 'hex').toString('utf8'),
