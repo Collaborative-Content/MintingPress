@@ -32,8 +32,6 @@ function getPullRequestsContract() {
 async function startContributionPeriod() {
     console.log("starting contribution period");
     const adminContract = getAdminContract();
-    console.log("admin contract is ", adminContract);
-    console.log("admin contract address is ", adminContract.address);
 
     const account = await getSelectedAddress();
     console.log("account to connect: ", account);
@@ -45,8 +43,6 @@ async function startContributionPeriod() {
 async function startVotingPeriod() {
     console.log("starting voting period");
     const adminContract = getAdminContract();
-    console.log("admin contract is ", adminContract);
-    console.log("admin contract address is ", adminContract.address);
 
     const account = await getSelectedAddress();
     console.log("account to connect: ", account);
@@ -58,8 +54,6 @@ async function startVotingPeriod() {
 async function endRound() {
     console.log("ending round");
     const adminContract = getAdminContract();
-    console.log("admin contract is ", adminContract);
-    console.log("admin contract address is ", adminContract.address);
 
     const account = await getSelectedAddress();
     console.log("account to connect: ", account);

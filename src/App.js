@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navigate from "./components/NavBar";
 import Mint from "./pages/Mint";

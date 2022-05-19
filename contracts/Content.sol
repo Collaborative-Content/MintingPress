@@ -118,8 +118,10 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits() external onlyOwner {
+    function assignVoteCredits() external onlyOwner {
+        // for each story
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
+            // for each author of the story
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
                 voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
@@ -136,14 +138,11 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit Voted(msg.sender, PRindex, _numVotes, positive, ownertokenId+1);
     }
 
+    // TODO method to determine when a piece of content has reached completion, via voting
     // function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {
-
     // }
 
-    // TODO approvePR should be called by the ContentFactory on all contracts at the same time
-    // ideally right before calling startContributionPeriod
-    // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
-    // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
+    // TODO extra security: verify votes have been tallied, check event?
     function approvePRs() external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
