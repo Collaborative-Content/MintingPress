@@ -29,11 +29,11 @@ contract AdminProxy is Ownable {
     }
 
     // @notice Order of the round is as follows:
-    //      admin calls startContributionPeriod() - requires contributionsOpen == votingOpen == false
-    //      admin calls startVotingPeriod() - requires ContributionDuration has passed since contributionsStartTime
-    //      admin calls endRound() - requires VotingDuration has passed since votingStartTime
-    //          this contributionsOpen = votingOpen = false period at end of round allows modifications of content to occur
-    //          before contribution period is again opened up.
+    // admin calls startContributionPeriod() - requires contributionsOpen == votingOpen == false, sets contributionsOpen = True
+    // admin calls startVotingPeriod() - requires ContributionDuration has passed since contributionsStartTime
+    // admin calls endRound() - requires VotingDuration has passed since votingStartTime
+    //     this contributionsOpen == votingOpen == false period after endRound() is called allows modifications of content to
+    //     occur (minting & burning) before contribution period is again opened up
 
     function startContributionPeriod() external onlyOwner {
         require(!contributionsOpen && !votingOpen, "Contributions cannot begin until last round has ended");
@@ -46,9 +46,9 @@ contract AdminProxy is Ownable {
     function startVotingPeriod() external onlyOwner {
         require(contributionsOpen && !votingOpen, "Voting must begin after contribution period");
         require(block.timestamp > contributionStartTime + settings.ContributionDuration(), "Voting cannot begin until end of contribution time");
-        contentContract._assignVoteCredits();
-        contributionsOpen = false; 
+        contributionsOpen = false;
         votingOpen = true;
+        contentContract.assignVoteCredits();
         votingStartTime = block.timestamp;
         emit VotingOpen();
     }
@@ -56,6 +56,7 @@ contract AdminProxy is Ownable {
     function endRound() external onlyOwner {
         require(!contributionsOpen && votingOpen, "Round must end after voting period");
         require(block.timestamp > votingStartTime + settings.VotingDuration(), "Round cannot end until end of voting time");
+        contributionsOpen = false;
         votingOpen = false;
         contentContract.approvePRs();
     }
