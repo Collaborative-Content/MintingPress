@@ -22,7 +22,7 @@ Clone this repo. From directory `MintingPress`:
 - `npx hardhat node` to set up a blockchain on localhost network, and create accounts with balances
 - `npx hardhat run --network localhost scripts/deploy.js` to deploy the smart contracts to ^ blockchain
 -  copy paste smart contract addresses from ^ into `src/constants.js`
--  `npm start` to run the react app
+-  `npm install` and then `npm start` to run the react app
 
 ## Additional functionality
 - `npx hardhat console` to open up a CLI with the smart contracts

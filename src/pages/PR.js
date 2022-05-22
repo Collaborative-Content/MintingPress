@@ -1,32 +1,59 @@
-import React, { useEffect, useState } from "react";
-import { Container } from "react-bootstrap";
-import Navigate from "../components/NavBar";
+import React, { useState } from "react";
+import { Container, Card, Form, Button } from "react-bootstrap";
 import StoryBox from "../components/StoryBox";
 import { toast } from "react-toastify";
 
 export default function PR({ story }) {
-  const [pr, setPr] = useState([]);
-  const prRef = useState([]);
+  const [fields, setFields] = useState({
+    prPrice: "",
+  })
+
+  const handleInputChange = (e) => {
+    setFields({
+        ...fields,
+        [e.target.name]:e.target.value
+    })
+  }
 
   function handleSubmitPR() {
-    toast("Pull request submitted!!");
+    const price = fields.prPrice;
 
-    const price = prRef.current.value;
     //sign and send the PR and handle any exceptions
     console.log(price);
+
+    toast("Pull request submitted!!");
   }
 
   return (
     <>
       <Container>
-        <StoryBox story={story}></StoryBox>
-        <label>Price for PR</label>
-        <br />
-        <input className="form-control" type="text" ref={prRef} />
-        <br />
-        <button class="btn btn-primary" onClick={handleSubmitPR}>
-          Submit Pull Request
-        </button>
+        <Card className='mx-auto' style={{maxWidth: '800px'}}>
+          <Card.Header>Submit a Pull Request</Card.Header>
+
+          <Card.Body>
+            <StoryBox story={story}></StoryBox>
+
+            <Form.Group controlId="formGridPRPrice" className='mt-2 mb-2'>
+              <Form.Label>Price For PR</Form.Label>
+
+              <Form.Control 
+                name="voteCredits"
+                value={fields.prPrice}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+          </Card.Body>
+
+          <Card.Footer className="text-muted">
+              <Button 
+                type="submit"
+                variant="primary" 
+                onClick={handleSubmitPR}
+              >
+                Submit Pull Request
+              </Button>
+          </Card.Footer>
+        </Card>
       </Container>
     </>
   );

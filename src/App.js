@@ -1,10 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navigate from "./components/NavBar";
-import Mint from "./pages/Mint";
-import List from "./pages/List";
-import PR from "./pages/PR";
-import Vote from "./pages/Vote";
-import Admin from "./pages/Admin";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import React from "react";
@@ -12,6 +7,12 @@ import { ToastContainer } from "react-toastify";
 import { requestAccount } from './utils/common';
 import {v4} from 'uuid';
 import { getContent } from "./utils/Contracts";
+import Landing from "./pages/Landing";
+import Mint from "./pages/Mint";
+import List from "./pages/List";
+import PR from "./pages/PR";
+import Vote from "./pages/Vote";
+import Admin from "./pages/Admin";
 
 function App() {
 
@@ -31,7 +32,7 @@ function App() {
       <div>
         <Navigate />
         <Routes>
-          <Route path="/" element={<Mint />}></Route>
+          <Route path="/" element={<Landing />}></Route>
           <Route path="/mint" element={<Mint />}></Route>
           <Route path="/view-story/:id" element={<PR id={""} />}></Route>
           <Route path="/list" element={<List />}></Route>
