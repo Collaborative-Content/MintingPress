@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Card, Button, Nav } from 'react-bootstrap';
+import { Container, Card, Nav } from 'react-bootstrap';
 
 export default function StoryCard({ story }) {
 
@@ -9,11 +9,11 @@ export default function StoryCard({ story }) {
       <Container>
       <Card>
       <Card.Body>
-        <Card.Title>{story.name}</Card.Title>
+        <Card.Title>{story.token_symbol}</Card.Title>
         <Card.Text>
-          {story.story}
+          {story.content}
         </Card.Text>
-        <Nav.Link href="submitPR">
+        <Nav.Link href={"story/" + story.content_token_id}>
           <a className="btn btn-primary">View Story</a>
         </Nav.Link>
       </Card.Body>

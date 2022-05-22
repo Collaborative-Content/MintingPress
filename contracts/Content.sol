@@ -36,7 +36,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     //mapping(uint => mapping(address => bool)) votesToComplete;
 
     event NewPR(address PRowner, uint tokenID, uint PRPrice);
-    event Voted(address voter, address PRowner, uint voteCredits, bool positive, uint tokenID);
+    event Voted(address voter, uint PRindex, uint voteCredits, bool positive, uint tokenID);
     event PRApproved(uint tokenID, address PRwinner);
     event NoPRApproved(uint tokenID);
     event NewContentMinted(uint tokenID, address creator);
@@ -118,8 +118,10 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits() external onlyOwner {
+    function assignVoteCredits() external onlyOwner {
+        // for each story
         for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
+            // for each author of the story
             for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
                 address author = contentAuthors[tokenId][i];
                 voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
@@ -128,22 +130,19 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit VoteCreditsAssigned();
     }
 
-    function vote(address _PRowner, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
+    function vote(uint PRindex, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
-        PRsContract.votePR(_PRowner, _numVotes, positive, ownertokenId+1);
+        PRsContract.votePR(PRindex, _numVotes, positive, ownertokenId+1);
         voteCredits[ownertokenId][msg.sender] -= (_numVotes ** 2); 
-        emit Voted(msg.sender, _PRowner, _numVotes, positive, ownertokenId+1);
+        emit Voted(msg.sender, PRindex, _numVotes, positive, ownertokenId+1);
     }
 
+    // TODO method to determine when a piece of content has reached completion, via voting
     // function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {
-
     // }
 
-    // TODO approvePR should be called by the ContentFactory on all contracts at the same time
-    // ideally right before calling startContributionPeriod
-    // TODO extra security: verify votes have been tallied, contributionsOpen AND votesOpen both false
-    // (I think we need a third state where neither are true to avoid edge case new contributions during vote tally)
+    // TODO extra security: verify votes have been tallied, check event?
     function approvePRs() external onlyOwner {
         require(!adminProxy.votingOpen(), "Voting is still open");
         require(!adminProxy.contributionsOpen(), "Contributions are currently open");
@@ -170,5 +169,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         // existing content + new lines + winning PR
         uint amount = bondingCurve.calculatePurchaseReturn(winningPRPrice, _PRwinner, ownershipTokenId);
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
+    }
+
+    function getVoteCredits(uint tokenID, address author) external view returns(uint) {
+        return voteCredits[tokenID][author];
+    }
+
+    function getBalanceOfAccount(uint tokenID, address account) external view returns(uint){
+        return balanceOf(account, tokenID);
     }
 }

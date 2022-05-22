@@ -9,6 +9,7 @@ contract PullRequests is Ownable {
 
     struct PR {
         bytes content;
+        address author;
         uint blockTimestamp;
         uint positiveVotes;
         uint negativeVotes;
@@ -18,12 +19,13 @@ contract PullRequests is Ownable {
 
     mapping(uint => mapping(address => PR)) public PRs;
     mapping(uint => mapping(address => bool)) public PRexists;
+    mapping(uint => mapping(uint => PR)) public PRlist;
     mapping(uint => address[]) public PRauthors;
+    mapping(uint => uint) public PRsPerTokenID;
 
-
-    function votePR(address _PRowner, uint _numVotes, bool positive, uint tokenID) external onlyOwner {
-        require(PRexists[tokenID][_PRowner], "PR does not exist");
-        PR storage votingPR = PRs[tokenID][_PRowner];
+    function votePR(uint index, uint _numVotes, bool positive, uint tokenID) external onlyOwner {
+        //require(PRexists[tokenID][_PRowner], "PR does not exist");
+        PR storage votingPR = PRlist[tokenID][index];
         if (positive) {
             votingPR.positiveVotes += _numVotes; 
         } else {
@@ -31,17 +33,27 @@ contract PullRequests is Ownable {
         }
     }
 
-    function submitPR(bytes memory _PRtext, uint tokenID, address caller, uint value) external payable onlyOwner {
+    function submitPR(bytes memory _PRtext, uint tokenID, address caller, uint value) external payable {
         // require(!PRexists[tokenID][caller], "Existing PR");
         PRauthors[tokenID].push(caller);
         // tokenID is content token ID
-        PRs[tokenID][caller] = PR({content: _PRtext, 
+        PRs[tokenID][caller] = PR({content: _PRtext,
+                                       author: caller, 
                                        blockTimestamp: block.timestamp,
                                        PRPrice: value,
                                        positiveVotes: 0,
                                        negativeVotes: 0,
                                        totalVotes: 0
                                     });
+        PRsPerTokenID[tokenID] += 1;
+        PRlist[tokenID][PRsPerTokenID[tokenID]] = PR({content: _PRtext,
+                              author: caller, 
+                              blockTimestamp: block.timestamp,
+                              PRPrice: value,
+                              positiveVotes: 0,
+                              negativeVotes: 0,
+                              totalVotes: 0
+                             });
         PRexists[tokenID][caller] = true;
     }
     
@@ -120,4 +132,15 @@ contract PullRequests is Ownable {
         return PRexists[tokenID][_PRowner];
     }
 
+    function getPrLengthByTokenID(uint tokenID) external view returns(uint) {
+        return PRsPerTokenID[tokenID];
+    }
+    
+    function getPRListByContentID(uint tokenID, uint index) external view returns(bytes memory) {
+        return PRlist[tokenID][index].content;
+    }
+
+    function getPRAuthor(uint tokenID, uint index) external view returns(address) {
+        return PRlist[tokenID][index].author;
+    }
 }

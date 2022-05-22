@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { toast } from "react-toastify";
-import { Container, Button, Form, Col, Row, FloatingLabel } from 'react-bootstrap';
+import { Button, Col, Container, FloatingLabel, Form, Row } from 'react-bootstrap';
 import React, { useState, useRef, useEffect } from 'react';
 import {v4} from 'uuid';
 import { mint } from '../utils/Contracts';
@@ -14,20 +14,13 @@ export default function Mint() {
   const storyRef = useRef()
 
   const [fields, setFields] = useState({
-    story: "start your story here",
+    story: "",
     supply: "",
     stake:"",
     symbol: "",
     PRprice: "",
     val: "",
   })
-
-  const handleInputChange = (e) => {
-      setFields({
-          ...fields,
-          [e.target.name]:e.target.value
-      })
-  }
 
   // useEffect(() => {
   //   const storedStories = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
@@ -41,10 +34,16 @@ export default function Mint() {
   //   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
   // }, [stories])
 
+  const handleInputChange = (e) => {
+    setFields({
+        ...fields,
+        [e.target.name]:e.target.value
+    })
+  }
+
   function mintStory() {
     mint(fields.symbol, fields.supply, fields.stake, fields.PRprice, fields.story, fields.val)
-    console.log(fields.story)
-    console.log(fields.symbol)
+    console.log("story:", fields.story, "; symbol:", fields.symbol)
   }
 
   return (
