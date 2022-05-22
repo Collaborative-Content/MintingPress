@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Container, Card, Nav } from "react-bootstrap";
 import { useHistory, useParams } from 'react-router-dom'
 import { getSelectedAddress, requestAccount } from "../utils/common";
-import { getVotes, getSpecifiedContent, getPRsList } from "../utils/Contracts";
+import { getVotes, getSpecifiedContent, getPRsList, submitVote } from "../utils/Contracts";
 import { toast } from "react-toastify";
 
 export default function Vote() {
@@ -42,24 +42,24 @@ export default function Vote() {
   }, []);
 
   function handleVote() {
-  //   if(voteCredit > 0){
-  //     const voteCreditsUsed = voteRef.current.value;
-  //     const approve = approveRef.current.value;
-  //     const deny = denyRef.current.value;
-  //     const prAuthor = prAddress;
-  //     let positive = approve > 0 ? 1 :  0;
-  //     console.log(voteCreditsUsed, approve, deny);
+    if(voteCredit > 0){
+      const voteCreditsUsed = voteRef.current.value;
+      const approve = approveRef.current.value;
+      const deny = denyRef.current.value;
+      const prIndex = pr_id;
+      let positive = approve > 0 ? 1 :  0;
+      console.log(voteCreditsUsed, approve, deny);
 
-  //     if(voteCreditsUsed <= voteCredit) {
-  //       setVoteCredit(voteCredit - voteCreditsUsed);
-
-  //       toast("Your vote has been submitted!!");
-  //     } else {
-  //       toast("You cannot cast more votes than available");
-  //     }
-  //   } else {
-  //     toast('You do not have the vote credits to perform that operation');
-  //   }
+      if(voteCreditsUsed <= voteCredit) {
+        setVoteCredit(voteCredit - voteCreditsUsed);
+        submitVote(id, prIndex, positive, voteCreditsUsed);
+        toast("Your vote has been submitted!!");
+      } else {
+        toast("You cannot cast more votes than available");
+      }
+    } else {
+      toast('You do not have the vote credits to perform that operation');
+    }
   }
 
   return (
@@ -91,7 +91,7 @@ export default function Vote() {
       </Container>
       <Container>
         <label>Vote Credits Available: {voteCredit}</label>
-        {/* <div>
+        <div>
           <label>Vote Credits to be used:</label>
           <input type="text" className="form-control" ref={voteRef}></input>
           <br />
@@ -110,7 +110,7 @@ export default function Vote() {
               Submit Your Vote!
             </button>
           </div>
-        </div> */}
+       </div> 
       </Container>
     </>
   );

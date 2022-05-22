@@ -191,8 +191,12 @@ async function getVotes(tokenID) {
     return credits;
 }
 
-async function submitVote(tokenID, address, positive, numVotes) {
+async function submitVote(tokenID, index, positive, numVotes) {
+    const account = await getSelectedAddress();
+    console.log("voting account: ", account);
+    const contract = getContentContract();
 
+    await contract.vote(index, numVotes, positive, tokenID)
 }
 export { getAdminContract, 
          getSettingsContract, 
@@ -208,4 +212,5 @@ export { getAdminContract,
          submitPR,
          getPRexists,
          getVotes,
-         getPRsList }
+         getPRsList,
+         submitVote }
