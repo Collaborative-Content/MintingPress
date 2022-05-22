@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, FloatingLabel } from "react-bootstrap";
+import { Form, Card } from "react-bootstrap";
 import { useState, useRef, useEffect } from "react";
 import { v4 } from "uuid";
 
@@ -35,19 +35,24 @@ function StoryBox({ story }) {
 
   return (
     <>
-      <FloatingLabel
-        controlId="floatingTextarea2"
-        label="Story"
-        style={{ marginBottom: "25px" }}
-      >
-        <Form.Control
-          as="textarea"
-          placeholder="Leave a comment here"
-          style={{ height: "200px" }}
-          ref={storyRef}
-        />
-        {story}
-      </FloatingLabel>
+      <Card>
+        <Card.Header>Story</Card.Header>
+
+        <Card.Body>
+          <Form>
+            <Form.Group controlId="formGridStoryBox" className='mb-2'>
+              <Form.Control
+                type="text"
+                disabled
+                readOnly
+                placeholder="..."
+                ref={storyRef}
+              />
+              {story}
+            </Form.Group>
+          </Form>
+        </Card.Body>
+      </Card>
     </>
   );
 }
