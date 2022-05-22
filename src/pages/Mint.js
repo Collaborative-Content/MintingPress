@@ -1,10 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { toast } from "react-toastify";
-import { Button, Col, Container, FloatingLabel, Form, Row } from 'react-bootstrap';
-import React, { useState, useRef, useEffect } from 'react';
-import {v4} from 'uuid';
+import { Container, Button, Form, Col, Card, Stack } from 'react-bootstrap';
+import React, { useState, useRef } from 'react';
 import { mint } from '../utils/Contracts';
-import StoryBox from "../components/StoryBox";
 
 const LOCAL_STORAGE_KEY = 'storiesApp.stories'
 
@@ -22,6 +19,13 @@ export default function Mint() {
     val: "",
   })
 
+  const handleInputChange = (e) => {
+      setFields({
+          ...fields,
+          [e.target.name]:e.target.value
+      })
+  }
+
   // useEffect(() => {
   //   const storedStories = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY))
   //   if (storedStories) setStories(storedStories)
@@ -34,92 +38,97 @@ export default function Mint() {
   //   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stories))
   // }, [stories])
 
-  const handleInputChange = (e) => {
-    setFields({
-        ...fields,
-        [e.target.name]:e.target.value
-    })
-  }
-
   function mintStory() {
     mint(fields.symbol, fields.supply, fields.stake, fields.PRprice, fields.story, fields.val)
-    console.log("story:", fields.story, "; symbol:", fields.symbol)
+    console.log(fields.story)
+    console.log(fields.symbol)
   }
 
   return (
       <>
-      <Container> 
-      <FloatingLabel controlId="floatingTextarea2" label="Story">
-        <Form.Control
-          as="textarea"
-          placeholder="Leave a comment here"
-          style={{ height: '600px' }}
-          name="story"
-          value={fields.story}
-          onChange={handleInputChange}
-        />
-      </FloatingLabel>
-      </Container>
-      <Container> 
+        <Container> 
+          <Card className='darkCard mx-auto shadow-sm' style={{maxWidth: '800px'}}>
+            <Card.Header>Create a Story</Card.Header>
 
-      <Row className="mb-3">
-    <Form.Group as={Col} controlId="formGridTokenSymbol">
-      <Form.Label>Token Symbol</Form.Label>
-      <Form.Control
-          name="symbol"
-          value={fields.symbol}
-          onChange={handleInputChange}
-        />
-    </Form.Group>
+            <Card.Body>
+              <Form>
+                <Form.Group as={Col} controlId="formGridCreateStory" className='mb-2'>
+                  <Form.Control
+                    as="textarea"
+                    placeholder="Once upon a time..."
+                    name="story"
+                    value={fields.story}
+                    onChange={handleInputChange}
+                    className='mb-2'
+                    style={{height: '25vh'}}
+                  />
+                </Form.Group>
 
-    <Form.Group as={Col} controlId="formGridSupply">
-    <Form.Label>Supply</Form.Label>
-      <Form.Control 
-          name="supply"
-          value={fields.supply}
-          onChange={handleInputChange}
-        />
-    </Form.Group>
+                <Stack direction='horizontal' className='gap-3 mb-2'>
+                  <Form.Group as={Col} controlId="formGridTokenSymbol">
+                    <Form.Label>Token Symbol</Form.Label>
 
-    <Form.Group as={Col} controlId="formGridOwnerStake">
-      <Form.Label>Owner Stake</Form.Label>
-      <Form.Control 
-          name="stake"
-          value={fields.stake}
-          onChange={handleInputChange}
-        />
-    </Form.Group>
+                    <Form.Control
+                      name="symbol"
+                      value={fields.symbol}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
 
-    <Form.Group as={Col} controlId="formGridMinPRPrice">
-      <Form.Label>Min PR Price</Form.Label>
-      <Form.Control 
-          name="PRprice"
-          value={fields.PRprice}
-          onChange={handleInputChange}
-        />
-    </Form.Group>
+                  <Form.Group as={Col} controlId="formGridSupply">
+                    <Form.Label>Supply</Form.Label>
 
-    <Form.Group as={Col} controlId="formGridETH">
-      <Form.Label>ETH Value</Form.Label>
-      <Form.Control 
-          name="val"
-          value={fields.val}
-          onChange={handleInputChange}
-        />
-    </Form.Group>
+                    <Form.Control 
+                      name="supply"
+                      value={fields.supply}
+                      onChange={handleInputChange}
+                    />
+                  </Form.Group>
+                </Stack>
 
-  </Row>
-  </Container>
-      <Container>
-        <Button
-          variant="primary"
-          type="submit"
-          className="btn-block"
-          onClick={mintStory}
-        >
-          Mint Your Story!
-        </Button>
-      </Container>
+                <Form.Group as={Col} controlId="formGridOwnerStake" className='mb-2'>
+                  <Form.Label>Owner Stake</Form.Label>
+
+                  <Form.Control 
+                    name="stake"
+                    value={fields.stake}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+
+                <Form.Group as={Col} controlId="formGridMinPRPrice" className='mb-2'>
+                  <Form.Label>Min PR Price</Form.Label>
+
+                  <Form.Control 
+                    name="PRprice"
+                    value={fields.PRprice}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+
+                <Form.Group as={Col} controlId="formGridETH" className='mb-2'>
+                  <Form.Label>ETH Value</Form.Label>
+
+                  <Form.Control 
+                    name="val"
+                    value={fields.val}
+                    onChange={handleInputChange}
+                  />
+                </Form.Group>
+              </Form>
+            </Card.Body>
+
+            <Card.Footer className="text-muted">
+                <Button 
+                  type="submit"
+                  variant="primary" 
+                  onClick={mintStory}
+                >
+                  Mint Your Story!
+                </Button>
+            </Card.Footer>
+          </Card>
+        </Container>
     </>
   );
 }
