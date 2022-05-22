@@ -179,10 +179,11 @@ async function getVotes(tokenID) {
     const account = await getSelectedAddress();
     console.log("account: ", account);
     const contract = getContentContract();
-    
+
+    await contract.setVoteCredits(tokenID-1, account);
     let credits = await contract.getVoteCredits(tokenID-1, account);
     
-    console.log(credits);
+    console.log("these are your vote credits: ", parseInt(credits));
     console.log(tokenID-1);
 
     let accountBalance = await contract.getBalanceOfAccount(tokenID-1, account);

@@ -144,7 +144,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
         PRsContract.votePR(PRindex, _numVotes, positive, ownertokenId+1);
-        voteCredits[ownertokenId][msg.sender] -= (_numVotes ** 2); 
+        voteCredits[ownertokenId][msg.sender] -= _numVotes; 
         emit Voted(msg.sender, PRindex, _numVotes, positive, ownertokenId+1);
     }
 
@@ -184,12 +184,16 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
     }
 
-    function getVoteCredits(uint tokenID, address author) external returns(uint) {
-        voteCredits[tokenID][author] = balanceOf(author, tokenID);
-        return voteCredits[tokenID][author];
-    }
-
     function getBalanceOfAccount(uint tokenID, address account) external view returns(uint){
         return balanceOf(account, tokenID);
     }
+
+    function setVoteCredits(uint tokenID, address author) external {
+        voteCredits[tokenID][author] = balanceOf(author, tokenID);
+    }
+    function getVoteCredits(uint tokenID, address author) external view returns(uint) {
+        return voteCredits[tokenID][author];
+    }
+
+    
 }
