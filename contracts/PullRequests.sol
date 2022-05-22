@@ -19,9 +19,9 @@ contract PullRequests is Ownable {
 
     mapping(uint => mapping(address => PR)) public PRs;
     mapping(uint => mapping(address => bool)) public PRexists;
-    mapping(uint => mapping(uint => PR)) public PRlist;
+    mapping(uint => mapping(uint => PR)) PRlist;
     mapping(uint => address[]) public PRauthors;
-    mapping(uint => uint) public PRsPerTokenID;
+    mapping(uint => uint) PRsPerTokenID;
 
     function votePR(uint index, uint _numVotes, bool positive, uint tokenID) external onlyOwner {
         //require(PRexists[tokenID][_PRowner], "PR does not exist");

@@ -105,6 +105,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         require(id % 2 == 0, "TokenID must be ownership token");
         super._mint(to, id, amount, data);
         contentAuthors[id].push(to); // add author to list of authors
+        voteCredits[id][to] = amount;
     }
 
     function submitPR(bytes memory _PRtext, uint _contentTokenID) external payable {
@@ -118,15 +119,26 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         emit NewPR(msg.sender, _contentTokenID, msg.value);
     }
 
-    function _assignVoteCredits() external {
-        for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
-            for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
-                address author = contentAuthors[tokenId][i];
-                voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
-            }
-        }
-        emit VoteCreditsAssigned();
-    }
+    // function _assignVoteCredits() external onlyOwner {
+    //     for (uint tokenId = 0; tokenId < contentTokenID; tokenId=tokenId+2) {
+    //         for (uint i = 0; i < contentAuthors[tokenId].length; i++) {
+    //             address author = contentAuthors[tokenId][i];
+    //             voteCredits[tokenId][author] = balanceOf(author, tokenId) ** 2;
+    //         }
+    //     }
+    //     emit VoteCreditsAssigned();
+    // }
+
+    // function assignVoteCreditByTokenID(uint tokenID) external returns(bool) {
+    //     bool success = false;
+    //     for (uint i; i < contentAuthors[tokenID].length; i++) {
+    //         address author = contentAuthors[tokenID][i];
+    //         voteCredits[tokenID][author] = balanceOf(author, tokenID);
+    //         success = true;
+    //     }
+    //     return success;
+        
+    // }
 
     function vote(uint PRindex, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
@@ -162,7 +174,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         }
     }
 
-    function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal onlyOwner {
+    function _modifyContentandMint(uint _contentTokenId, address _PRwinner) internal {
         bytes memory winningContent = PRsContract.getContent(_PRwinner, _contentTokenId);
         uint winningPRPrice = PRsContract.getPrice(_PRwinner, _contentTokenId);
         contentData[_contentTokenId] = bytes.concat(contentData[_contentTokenId], " ", winningContent);  // contentData[_contentTokenId] = winningContent;
@@ -172,7 +184,8 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         _mintOwnership(_PRwinner, ownershipTokenId, amount, bytes(""));
     }
 
-    function getVoteCredits(uint tokenID, address author) external view returns(uint) {
+    function getVoteCredits(uint tokenID, address author) external returns(uint) {
+        voteCredits[tokenID][author] = balanceOf(author, tokenID);
         return voteCredits[tokenID][author];
     }
 
