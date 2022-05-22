@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Container, Card, Nav } from "react-bootstrap";
-import { useHistory, useParams } from 'react-router-dom'
+import { Container, Card, Button, ListGroup } from "react-bootstrap";
+import { useParams } from 'react-router-dom'
 import { getSelectedAddress, requestAccount } from "../utils/common";
 import { getVotes, getSpecifiedContent, getPRsList } from "../utils/Contracts";
 import { toast } from "react-toastify";
@@ -65,52 +65,27 @@ export default function Vote() {
   return (
     <>
       <Container>
-        <Card>
+        <Card className='darkCard mx-auto shadow-sm' style={{maxWidth: '800px'}}>
+          <Card.Header>{specifiedStory.token_symbol}</Card.Header>
+
           <Card.Body>
-            <Card.Title>{specifiedStory.token_symbol}</Card.Title>
-            <Card.Text>
-              {specifiedStory.content}
-            </Card.Text>
+            <Card.Text>{specifiedStory.content}</Card.Text>
+              <ListGroup variant="flush">
+                <ListGroup.Item>PR ID: {specifiedPR.index}</ListGroup.Item>
+                <ListGroup.Item>Vote Credits Available: {voteCredit}</ListGroup.Item>
+              </ListGroup>
           </Card.Body>
+
+          <Card.Footer className="text-muted">
+              <Button 
+                type="submit"
+                variant="primary" 
+                onClick={handleVote}
+              >
+                Submit your Vote!
+              </Button>
+          </Card.Footer>
         </Card>
-        <Card>
-          <Card.Body>
-            <Card.Text>
-              {specifiedPR.content}
-            </Card.Text>
-            <Card.Text>
-              PR ID:
-              {specifiedPR.index}
-            </Card.Text>
-            <Card.Text>
-              PR Author:
-              {specifiedPR.author}
-            </Card.Text>
-          </Card.Body>
-        </Card>
-      </Container>
-      <Container>
-        <label>Vote Credits Available: {voteCredit}</label>
-        {/* <div>
-          <label>Vote Credits to be used:</label>
-          <input type="text" className="form-control" ref={voteRef}></input>
-          <br />
-          <div>
-            <input type="radio" ref={approveRef}></input> &nbsp;
-            <label>Approve </label> &nbsp;
-            <input type="radio" ref={denyRef}></input>&nbsp;
-            <label>Deny </label>
-          </div>
-          <br />
-          <div>
-            <button
-              onClick={handleVote}
-              className="btn btn-primary"
-            >
-              Submit Your Vote!
-            </button>
-          </div>
-        </div> */}
       </Container>
     </>
   );

@@ -1,25 +1,26 @@
 import React from 'react';
-import { Container, Card, Nav } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 
 export default function StoryCard({ story }) {
 
   return (
-    <>
-      <div style={{ marginBottom: "20px", borderWidth: 10, borderColor: 'blue' }}>
-      <Container>
-      <Card>
+    <Card className='darkCard mb-4 shadow-sm'>
+      <Card.Header>{story.token_symbol}</Card.Header>
+
       <Card.Body>
-        <Card.Title>{story.token_symbol}</Card.Title>
         <Card.Text>
           {story.content}
         </Card.Text>
-        <Nav.Link href={"story/" + story.content_token_id}>
-          <a className="btn btn-primary">View Story</a>
-        </Nav.Link>
       </Card.Body>
+
+      <Card.Footer className="text-muted">
+          <Button 
+            variant="primary" 
+            href={"story/" + story.content_token_id}
+          >
+            View Story
+          </Button>
+      </Card.Footer>
     </Card>
-    </Container>
-    </div>
-    </>
   );
 }

@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Button, Card, Container, FloatingLabel, Form, Nav } from "react-bootstrap";
-import { useHistory, useParams } from 'react-router-dom'
+import React, { useState } from "react";
+import { Button, Card, Container, Form } from "react-bootstrap";
+import { useParams } from 'react-router-dom'
 import { getSpecifiedContent } from '../utils/Contracts';
-import StoryBox from "../components/StoryBox";
-import { toast } from "react-toastify";
 import { submitPR, getPRexists } from '../utils/Contracts';
 
 export default function SubmitPR() {
-
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
   const { id } = useParams();
+
   console.log("PR page for story id ", id);
   
   const [fields, setFields] = useState({
@@ -42,52 +40,62 @@ export default function SubmitPR() {
   return (
     <>
       <Container>
-        <Card>
-        <Card.Body>
-          <Card.Title>{specifiedStory.token_symbol}</Card.Title>
-          <Card.Text>
-            {specifiedStory.content}
-          </Card.Text>
-        </Card.Body>
+        <Card className="darkCard mb-4 shadow-sm">
+          <Card.Header>{specifiedStory.token_symbol}</Card.Header>
+          <Card.Body>
+            <Card.Text>
+              <p>
+                {specifiedStory.content}
+              </p>
+              <footer className="blockquote-footer">
+                MintingPress NFT #{specifiedStory.content_token_id}
+              </footer>
+            </Card.Text>
+
+            <Form.Group controlId="prAddition" className='mb-2'>
+              <Form.Label>PR Addition</Form.Label>
+
+              <Form.Control 
+                name="text"
+                placeholder="Leave a comment here"
+                value={fields.text}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="ethValue" className='mb-2'>
+              <Form.Label>ETH Value</Form.Label>
+
+              <Form.Control 
+                name="val"
+                placeholder="0"
+                value={fields.val}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+
+          </Card.Body>
+
+          <Card.Footer>
+            <Button
+              variant="primary"
+              type="submit"
+              className="btn-block"
+              onClick={handleSubmitPR}
+            >
+              Submit Pull Request!
+            </Button>
+          </Card.Footer>
         </Card>
+
         {/* <StoryBox story={specifiedStory}></StoryBox> */}
-        <FloatingLabel
-          controlId="floatingTextarea2"
-          label="PR addition"
-          style={{ marginBottom: "25px" }}
-        >
-          <Form.Control
-            name="text"
-            as="textarea"
-            placeholder="Leave a comment here"
-            style={{ height: "200px" }}
-            onChange={handleInputChange}
-          />
-        </FloatingLabel>
+
         {/* <label>Price for PR</label>
         <br />
         <input className="form-control" type="text" onChange={handleInputChange}/>
         <br /> */}
-        <Form.Group>
-          <Form.Label>ETH Value</Form.Label>
-          <Form.Control 
-              name="val"
-              value={fields.val}
-              onChange={handleInputChange}
-            />
-        </Form.Group>
-        </Container>
 
-        <Container>
-          <Button
-            variant="primary"
-            type="submit"
-            className="btn-block"
-            onClick={handleSubmitPR}
-          >
-            Submit Pull Request!
-          </Button>
-        </Container>
+    </Container>
     </>
   );
 }
