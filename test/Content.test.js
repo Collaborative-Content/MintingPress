@@ -144,6 +144,12 @@ describe("Content Contract functions", function () {
             expect(await contentContract.balanceOf(contentContract.address, 1)).to.equal(1);
         });
     
+        it("should assert that the number of voteCredits is the same as the tokens", async function () {
+            await contentContract.connect(creator).mint(
+                tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
+            console.log("Creator address: ", creator);
+            expect(await contentContract.voteCredits[0][creator]).to.equal(await contentContract.balanceOf(creator, 0));
+        });
     });
     
     // PR submitted tests
@@ -253,6 +259,7 @@ describe("Content Contract functions", function () {
                 tokensymbol, supply, ownerStake, initialprice, tempData, overridesWithETH);
             //console.log(await contentContract.balanceOf(creator.address, 0))
             await adminContract.connect(owner).startContributionPeriod();
+           
             // submit PR
             await contentContract.connect(pR1).submitPR(prData1, tokenID, overridesWithETH);   
             await contentContract.connect(pR2).submitPR(prData2, tokenID, overridesWithETH);
@@ -261,10 +268,11 @@ describe("Content Contract functions", function () {
                 return new Promise( resolve => setTimeout(resolve, ms) );
             }
             await delay(1000);
-            await expect(adminContract.connect(owner).startVotingPeriod()).to.emit(contentContract, "VoteCreditsAssigned").withArgs();
+            await adminContract.connect(owner).startVotingPeriod();
+            //await expect(adminContract.connect(owner).startVotingPeriod()).to.emit(contentContract, "VoteCreditsAssigned").withArgs();
             //await expect(contentContract.voteCredits(tokenID, creator.address)).to.be.eq(ethers.BigNumber.from(ownerStake**2));
             tokenID = 0;
-            //console.log("creator balance token 0: ",await contentContract.balanceOf(creator.address, tokenID));
+            console.log("creator balance token 0: ",await contentContract.balanceOf(creator.address, tokenID));
             //console.log("creator vote credits", await contentContract.voteCredits(tokenID, creator.address));
             await contentContract.connect(creator).vote(pR1.address, 1, true, tokenID);
             await delay(1000);

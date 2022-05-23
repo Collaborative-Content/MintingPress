@@ -57,7 +57,7 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
     }
 
     modifier onlyAuthor(uint tokenID) {
-        require(balanceOf(msg.sender, tokenID) > 0, 
+        require(voteCredits[tokenID][msg.sender] > 0, 
                 "Must have content authorship tokens");
         _;
     }
@@ -140,12 +140,13 @@ contract Content is ERC1155, Ownable, IERC1155Receiver{
         
     // }
 
-    function vote(uint PRindex, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) {
+    function vote(uint PRindex, uint _numVotes, bool positive, uint ownertokenId) external onlyAuthor(ownertokenId) returns(bool) {
         require(adminProxy.votingOpen(), "Voting is currently closed");
         require((_numVotes <= voteCredits[ownertokenId][msg.sender]), "Not enough vote credits");
         PRsContract.votePR(PRindex, _numVotes, positive, ownertokenId+1);
         voteCredits[ownertokenId][msg.sender] -= _numVotes; 
         emit Voted(msg.sender, PRindex, _numVotes, positive, ownertokenId+1);
+        return true;
     }
 
     // function voteToComplete(address _PRowner, uint tokenId) external onlyAuthor(tokenId) {

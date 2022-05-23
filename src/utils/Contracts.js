@@ -196,8 +196,10 @@ async function submitVote(tokenID, index, positive, numVotes) {
     console.log("voting account: ", account);
     const contract = getContentContract();
 
-    await contract.vote(index, numVotes, positive, tokenID)
+    const success = await contract.vote(index, numVotes, positive, tokenID);
+    return success;
 }
+
 export { getAdminContract, 
          getSettingsContract, 
          getContentContract, 
