@@ -21,7 +21,7 @@ export default function List() {
     <Container>
       {
         stories[0] ? stories.map(story => (
-          <StoryCard key={story.id} story={story}/>
+          <StoryCard key={story.key} story={story}/>
         )) 
         :   
           <Card className="darkCard shadow-sm">

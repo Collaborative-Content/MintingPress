@@ -70,10 +70,30 @@ export default function Vote() {
 
           <Card.Body>
             <Card.Text>{specifiedStory.content}</Card.Text>
+            <Card.Text>[PR] {specifiedPR.content} [PR]</Card.Text>
               <ListGroup variant="flush">
-                <ListGroup.Item>PR ID: {specifiedPR.index}</ListGroup.Item>
-                <ListGroup.Item>Vote Credits Available: {voteCredit}</ListGroup.Item>
+                <ListGroup.Item>PR ID #{specifiedPR.index}</ListGroup.Item>
+                <ListGroup.Item>PR Author: {specifiedPR.author}</ListGroup.Item>
               </ListGroup>
+          </Card.Body>
+        </Card>
+
+        <Card className='darkCard mx-auto shadow-sm' style={{maxWidth: '800px', marginTop: '25px'}}>
+          <Card.Header>Vote Credits Available: {voteCredit}</Card.Header>
+
+          <Card.Body>
+          <div>
+          <Card.Text>Vote Credits to be used:</Card.Text>
+            <input type="text" className="form-control" ref={voteRef}></input>
+            <br />
+            <div>
+              <input type="radio" ref={approveRef}></input> &nbsp;
+              <label>Approve </label> &nbsp;
+              <input type="radio" ref={denyRef}></input>&nbsp;
+              <label>Deny </label>
+            </div>
+            <br />
+          </div>
           </Card.Body>
 
           <Card.Footer className="text-muted">
