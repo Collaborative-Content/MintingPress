@@ -84,16 +84,25 @@ export default function Vote() {
           <Card.Body>
           <div>
           <Card.Text>Vote Credits to be used:</Card.Text>
-            <input type="text" className="form-control" ref={voteRef}></input>
+            <input type="text" size="5" className="form-control" value="0" ref={voteRef}></input>
             <br />
             <div>
-              <input type="radio" ref={approveRef}></input> &nbsp;
-              <label>Approve </label> &nbsp;
-              <input type="radio" ref={denyRef}></input>&nbsp;
-              <label>Deny </label>
+              <form>
+                <input type="radio" id="approve" name="vote" value="Approve" ref={approveRef}></input> &nbsp;
+                <label for="approve">Approve </label> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" id="deny" name="vote" value="Deny" ref={denyRef}></input>&nbsp;
+                <label for="deny">Deny </label>
+              </form>
             </div>
-            <br />
           </div>
+
+          {/* <div class="vote roundrect">
+            <div class="increment up"></div>
+            <div class="increment down"></div>
+            
+            <div class="count">4</div>
+          </div> */}
+          
           </Card.Body>
 
           <Card.Footer className="text-muted">
