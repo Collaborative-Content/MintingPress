@@ -1,4 +1,4 @@
-import { Container, Card, Stack, Button } from "react-bootstrap";
+import { Row, Col, Image, Container, Card, Stack, Button } from "react-bootstrap";
 
 export default function Landing() {
 
@@ -19,7 +19,12 @@ export default function Landing() {
 							<h4 className='mt-4 mb-4'>
 								MintingPress uses the power of NFTs to augment the creative process and get authors paid.
 							</h4>
-						</Stack>					
+						</Stack>
+						<Row className="justify-content-md-center">
+							<Col xs={12} sm={4} md={4}>
+								<Image src="mintingpress_square.png" rounded fluid></Image>
+							</Col>
+						</Row>					
 					</Card.Body>
 
 					<Card.Footer align='center'>
