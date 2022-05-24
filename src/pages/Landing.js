@@ -23,7 +23,8 @@ export default function Landing() {
 					</Card.Body>
 
 					<Card.Footer align='center'>
-						<Button href='/mint'>Mint a Story</Button>
+						<Button href='/mint'>Mint a Story</Button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<Button href='/list'>View Stories</Button>
 					</Card.Footer>
 				</Card>
       </Container>
