@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/react-fontawesome": "^0.1.18",
     "@primitivefi/hardhat-marmite": "^0.0.4",
     "@remix-project/remixd": "^0.5.5",
     "@testing-library/jest-dom": "^5.16.1",
@@ -15,6 +18,7 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "react-toastify": "^8.1.0",
+    "styled-components": "^5.3.5",
     "uuid": "^8.3.2",
     "web-vitals": "^1.1.2"
   },
@@ -50,7 +54,7 @@
     "dotenv": "^10.0.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.3",
-    "hardhat": "^2.8.3",
+    "hardhat": "^2.9.6",
     "hardhat-contract-sizer": "^2.4.0"
   }
 }

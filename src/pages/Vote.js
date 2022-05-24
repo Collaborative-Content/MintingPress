@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Container, Card, Nav } from "react-bootstrap";
-import { useHistory, useParams } from 'react-router-dom'
+import { Container, Card, Button, ListGroup } from "react-bootstrap";
+import { useParams } from 'react-router-dom'
 import { getSelectedAddress, requestAccount } from "../utils/common";
 import { getVotes, getSpecifiedContent, getPRsList } from "../utils/Contracts";
 import { toast } from "react-toastify";
@@ -65,52 +65,56 @@ export default function Vote() {
   return (
     <>
       <Container>
-        <Card>
+        <Card className='darkCard mx-auto shadow-sm' style={{maxWidth: '800px'}}>
+          <Card.Header>{specifiedStory.token_symbol}</Card.Header>
+
           <Card.Body>
-            <Card.Title>{specifiedStory.token_symbol}</Card.Title>
-            <Card.Text>
-              {specifiedStory.content}
-            </Card.Text>
+            <Card.Text>{specifiedStory.content}</Card.Text>
+            <Card.Text>[PR] {specifiedPR.content} [PR]</Card.Text>
+              <ListGroup variant="flush">
+                <ListGroup.Item>PR ID #{specifiedPR.index}</ListGroup.Item>
+                <ListGroup.Item>PR Author: {specifiedPR.author}</ListGroup.Item>
+              </ListGroup>
           </Card.Body>
         </Card>
-        <Card>
+
+        <Card className='darkCard mx-auto shadow-sm' style={{maxWidth: '800px', marginTop: '25px'}}>
+          <Card.Header>Vote Credits Available: {voteCredit}</Card.Header>
+
           <Card.Body>
-            <Card.Text>
-              {specifiedPR.content}
-            </Card.Text>
-            <Card.Text>
-              PR ID:
-              {specifiedPR.index}
-            </Card.Text>
-            <Card.Text>
-              PR Author:
-              {specifiedPR.author}
-            </Card.Text>
+          <div>
+          <Card.Text>Vote Credits to be used:</Card.Text>
+            <input type="text" size="5" className="form-control" value="0" ref={voteRef}></input>
+            <br />
+            <div>
+              <form>
+                <input type="radio" id="approve" name="vote" value="Approve" ref={approveRef}></input> &nbsp;
+                <label for="approve">Approve </label> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" id="deny" name="vote" value="Deny" ref={denyRef}></input>&nbsp;
+                <label for="deny">Deny </label>
+              </form>
+            </div>
+          </div>
+
+          {/* <div class="vote roundrect">
+            <div class="increment up"></div>
+            <div class="increment down"></div>
+            
+            <div class="count">4</div>
+          </div> */}
+          
           </Card.Body>
+
+          <Card.Footer className="text-muted">
+              <Button 
+                type="submit"
+                variant="primary" 
+                onClick={handleVote}
+              >
+                Submit your Vote!
+              </Button>
+          </Card.Footer>
         </Card>
-      </Container>
-      <Container>
-        <label>Vote Credits Available: {voteCredit}</label>
-        {/* <div>
-          <label>Vote Credits to be used:</label>
-          <input type="text" className="form-control" ref={voteRef}></input>
-          <br />
-          <div>
-            <input type="radio" ref={approveRef}></input> &nbsp;
-            <label>Approve </label> &nbsp;
-            <input type="radio" ref={denyRef}></input>&nbsp;
-            <label>Deny </label>
-          </div>
-          <br />
-          <div>
-            <button
-              onClick={handleVote}
-              className="btn btn-primary"
-            >
-              Submit Your Vote!
-            </button>
-          </div>
-        </div> */}
       </Container>
     </>
   );
