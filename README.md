@@ -9,7 +9,7 @@ What if Reddit threads could be fully monetized? With the power of Ethereum, we 
 The goals of MintingPress are simple:
 1. Foster collaboration among like minded individuals
 2. Compensate authors fairly based on the magnitude and timing of their contributions
-3. Preserve and even augment the creative process
+3. Preserve and augment the creative process
 
 Happy Minting!
 

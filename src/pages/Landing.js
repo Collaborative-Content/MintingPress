@@ -13,18 +13,18 @@ export default function Landing() {
 						<Stack direction='vertical' align='center'>
 							<h1 className='mt-4'>
 								Fostering collaboration,
-								and compensating authors.
+								and empowering authors.
 							</h1>
 
 							<h4 className='mt-4 mb-4'>
-								MintingPress uses the power of NFT's to preserve and augment the creative process.
+								MintingPress uses the power of NFTs to augment the creative process and get authors paid.
 							</h4>
 						</Stack>					
 					</Card.Body>
 
 					<Card.Footer align='center'>
-						<Button href='/mint'>Mint a Story</Button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						<Button href='/list'>View Stories</Button>
+						<Button variant="primary" size="lg" href='/mint'>Mint a Story</Button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<Button variant="primary" size="lg" href='/list'>View Stories</Button>
 					</Card.Footer>
 				</Card>
       </Container>

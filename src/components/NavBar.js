@@ -16,7 +16,7 @@ export default function Navigate(props) {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
             <Nav.Link href="/mint">Mint Story</Nav.Link>
-            <Nav.Link href="/list">Stories</Nav.Link>
+            <Nav.Link href="/list">View Stories</Nav.Link>
             <Nav.Link href="/admin">Admin Controls</Nav.Link>
           </Nav>
           <Toggle theme={props.theme} toggleTheme={props.themeToggler} />
