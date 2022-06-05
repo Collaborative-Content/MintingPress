@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card } from 'react-bootstrap';
+import { Button, Card, Container, Nav } from 'react-bootstrap';
 
 export default function StoryCard({ story }) {
 

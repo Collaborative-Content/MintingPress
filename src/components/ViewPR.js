@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
-import { useParams } from 'react-router-dom'
+import { Card, Button, Container, Nav } from 'react-bootstrap';
+import { useHistory, useParams } from 'react-router-dom'
+import { getSpecifiedContent } from '../utils/Contracts';
 
 export default function ViewPR({ singlePR }) {
 

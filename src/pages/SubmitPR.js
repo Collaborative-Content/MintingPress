@@ -7,7 +7,7 @@ import { submitPR, getPRexists } from '../utils/Contracts';
 export default function SubmitPR() {
   const [specifiedStory, setSpecifiedStory] = React.useState([]);
   const { id } = useParams();
-
+  
   console.log("PR page for story id ", id);
   
   const [fields, setFields] = useState({

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Container, Card, Button } from 'react-bootstrap';
-import { useParams } from 'react-router-dom'
+import { Container, Card, Nav, Button } from 'react-bootstrap';
+import { useHistory, useParams } from 'react-router-dom'
+import SubmitPR from '../pages/SubmitPR';
 import ViewPR from '../components/ViewPR';
 import { getSpecifiedContent, getPRsList } from '../utils/Contracts';
 
