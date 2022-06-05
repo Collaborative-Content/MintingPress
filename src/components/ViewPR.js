@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Card, Nav } from 'react-bootstrap';
+import { Card, Button, Container, Nav } from 'react-bootstrap';
 import { useHistory, useParams } from 'react-router-dom'
 import { getSpecifiedContent } from '../utils/Contracts';
 
@@ -10,25 +10,22 @@ export default function ViewPR({ singlePR }) {
   console.log("View PR component, PR details ", singlePR);
   
   return (
-    <>
-      <div style={{ marginBottom: "20px", borderWidth: 10, borderColor: 'blue' }}>
-      <Container>
-      <Card>
+    <Card className='darkCard mb-4 shadow-sm'>
+      <Card.Header>PR #{singlePR.index}</Card.Header>
+
       <Card.Body>
-        <Card.Title>{singlePR.index}</Card.Title>
-        <Card.Text>
-          {singlePR.content}
-        </Card.Text>
-        <Card.Text>
-          {singlePR.author}
-        </Card.Text>
-        <Nav.Link href={id + "/" + singlePR.index + "/vote"}>
-          <a className="btn btn-primary">Vote</a>
-        </Nav.Link>
+        <Card.Text className='mb-4'>{singlePR.content}</Card.Text>
+        <Card.Text>Author: {singlePR.author}</Card.Text>
       </Card.Body>
+
+      <Card.Footer className="text-muted">
+          <Button 
+            variant="primary" 
+            href={id + "/" + singlePR.index + "/vote"}
+          >
+            Vote
+          </Button>
+      </Card.Footer>
     </Card>
-    </Container>
-    </div>
-    </>
   );
 }

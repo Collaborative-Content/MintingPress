@@ -1,0 +1,95 @@
+/* @import url(https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic,700italic);
+
+$size : 10rem;
+$border-width : .5rem;
+$radius : 1rem;
+$transition : .3s;
+
+$bg : #F6F3E4;
+$green : #4BC35F;
+$red : #C15044;
+
+
+.roundrect {
+  .up { border-radius: 2rem 2rem 0 0; }
+  .down { border-radius: 0 0 2rem 2rem; }
+  .count { border-radius: .5rem .5rem; }
+}
+.chev {
+  .up { border-radius: 50% 50% 0 0; }
+  .down { border-radius: 0 0 50% 50%; }
+  .count { border-radius: 100%/50%; }
+}
+
+.circle {
+  .up { border-radius: $size $size 0 0; }
+  .down { border-radius: 0 0 $size $size; }
+  .count { border-radius: 50%; }
+}
+
+.vote {
+  display: flex;
+  flex-direction: column;
+  font-family: "Noto Sans";
+  position: relative;
+  width: $size;
+  height: $size;
+  margin: 1rem;
+}
+
+.increment {
+  flex: 1 0 0;
+  text-align: center;
+  opacity: .5;
+  transition: $transition;
+  cursor: pointer;
+  
+  &.up {
+    background: $green;
+    height: 50%;
+    margin-bottom: $border-width/2;
+  }
+  &.down {
+    background: $red;
+    height: 50%;
+  }
+  
+  &:hover {
+    opacity: 1;    
+  }
+}
+
+.count {
+  position: absolute;
+  top: 0;
+  border-radius: $radius*.1;
+  margin: $size*.25;
+  background: $bg;
+  width: $size*.5;
+  font-size: $size*.25;
+  font-weight: bold;
+  line-height: $size*.5;
+  text-align: center;
+  box-shadow: 0 0 0 $border-width $bg;
+  pointer-events: none;
+  
+  &.upvoted { color: $green; }
+  &.downvoted { color: $red; }
+}
+
+.bump {
+  animation: bump 200ms;
+}
+
+@keyframes bump {
+  30% { transform: scale(1.2); }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $bg;
+} */
