@@ -29,3 +29,5 @@ package-lock.json
 artifacts
 cache
 *.env
+
+#new additions
