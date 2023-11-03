@@ -13,6 +13,9 @@ The goals of MintingPress are simple:
 
 Happy Minting!
 
+Click to watch the Demo & Launch:
+[![Minting Press - Launch Video](https://img.youtube.com/vi/amBGfcn4lTQ/maxresdefault.jpg)](https://youtu.be/amBGfcn4lTQ)
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## To get this up and running locally
